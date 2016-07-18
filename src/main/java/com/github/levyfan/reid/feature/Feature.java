@@ -1,10 +1,6 @@
 package com.github.levyfan.reid.feature;
 
 import com.github.levyfan.reid.BowImage;
-import com.github.levyfan.reid.sp.SuperPixel;
-
-import java.awt.image.BufferedImage;
-import java.util.List;
 
 /**
  * @author fanliwen
@@ -12,12 +8,10 @@ import java.util.List;
 public interface Feature {
 
     enum Type {
-        HSV, CN, HOG, SILTP
+        HSV, CN, HOG, SILTP, ALL
     }
 
     Type name();
 
-    List<double[]> extract(BufferedImage image, SuperPixel[] sp);
-
-    List<double[]> extract(BowImage bowImage);
+    void extract(BowImage bowImage);
 }

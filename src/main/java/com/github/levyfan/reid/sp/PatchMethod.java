@@ -15,7 +15,7 @@ public class PatchMethod implements SuperPixelMethond {
         this.size = patchSize;
     }
 
-    public SuperPixel[] patch(BufferedImage image) {
+    private SuperPixel[] patch(BufferedImage image) {
         List<SuperPixel> superPixels = new ArrayList<>();
 
         int label = 0;

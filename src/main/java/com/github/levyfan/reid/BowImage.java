@@ -2,10 +2,13 @@ package com.github.levyfan.reid;
 
 import com.github.levyfan.reid.bow.Strip;
 import com.github.levyfan.reid.bow.StripMethod;
+import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.sp.SuperPixel;
 import com.github.levyfan.reid.sp.SuperPixelMethond;
 
 import java.awt.image.BufferedImage;
+import java.util.EnumMap;
+import java.util.Map;
 
 /**
  * @author fanliwen
@@ -23,6 +26,10 @@ public class BowImage {
     public SuperPixel[] sp4;
 
     public Strip[] strip4;
+
+    public Map<Feature.Type, double[]> hist = new EnumMap<>(Feature.Type.class);
+
+//    public Map<Feature.Type, double[]> features = new EnumMap<>(Feature.Type.class);
 
     public BowImage(SuperPixelMethond spMethod, StripMethod stripMethod, BufferedImage image, BufferedImage mask) {
         this.image = image;

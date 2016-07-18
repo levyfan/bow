@@ -9,18 +9,16 @@ import org.apache.commons.math3.stat.descriptive.summary.Sum;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author fanliwen
  */
-public class Siltp implements Feature {
+class Siltp implements Feature {
 
     private static final double tau = 0.3;
     private static final int total = 81;
 
-    public static RealMatrix siltp(RealMatrix gray, double tau, int R) {
+    private static RealMatrix siltp(RealMatrix gray, double tau, int R) {
         int h = gray.getRowDimension();
         int w = gray.getColumnDimension();
 
@@ -68,7 +66,7 @@ public class Siltp implements Feature {
         return matrix;
     }
 
-    public List<double[]> siltp(BufferedImage image, SuperPixel[] sp) {
+    private void siltp(BufferedImage image, SuperPixel[] sp) {
         RealMatrix gray = MatrixUtils.createRealMatrix(image.getHeight(), image.getWidth());
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
@@ -81,7 +79,6 @@ public class Siltp implements Feature {
         RealMatrix j3 = siltp(gray, tau, 3*4);
         RealMatrix j5 = siltp(gray, tau, 5*4);
 
-        List<double[]> feature = new ArrayList<>(sp.length);
         for (SuperPixel aSp : sp) {
             int[] rows = aSp.rows;
             int[] cols = aSp.cols;
@@ -101,9 +98,8 @@ public class Siltp implements Feature {
                 }
             }
 
-            feature.add(h);
+            aSp.features.put(name(), h);
         }
-        return feature;
     }
 
     @Override
@@ -112,61 +108,7 @@ public class Siltp implements Feature {
     }
 
     @Override
-    public List<double[]> extract(BufferedImage image, SuperPixel[] sp) {
-        return siltp(image, sp);
-    }
-
-    @Override
-    public List<double[]> extract(BowImage bowImage) {
-        return siltp(bowImage.image4, bowImage.sp4);
-//        RealMatrix gray = MatrixUtils.createRealMatrix(bowImage.image.getHeight(), bowImage.image.getWidth());
-//        for (int y = 0; y < bowImage.image.getHeight(); y++) {
-//            for (int x = 0; x < bowImage.image.getWidth(); x++) {
-//                Color color = new Color(bowImage.image.getRGB(x, y));
-//                double v = 0.2989 * color.getRed() + 0.5870 * color.getGreen() + 0.1140 * color.getBlue();
-//                gray.setEntry(y, x, Math.round(v));
-//            }
-//        }
-//
-//        RealMatrix j3 = siltp(gray, tau, 3);
-//        RealMatrix j5 = siltp(gray, tau, 5);
-//
-//        List<double[]> feature = new ArrayList<>(bowImage.sp4.length);
-//        for (SuperPixel aSp : bowImage.sp4) {
-//            int[] rows = aSp.rows;
-//            for (int k = 0; k < rows.length; k++) {
-//                rows[k] = rows[k]/4;
-//            }
-//
-//            int[] cols = aSp.cols;
-//            for (int k = 0; k < cols.length; k++) {
-//                cols[k] = cols[k]/4;
-//            }
-//
-//            int row = -1;
-//            int col = -1;
-//            double[] h3 = new double[total];
-//            double[] h5 = new double[total];
-//            for (int k = 0; k < rows.length; k++) {
-//                if (rows[k] == row && cols[k] == col) {
-//                    continue;
-//                }
-//                row = rows[k];
-//                col = cols[k];
-//                h3[(int) j3.getEntry(row, col)]++;
-//                h5[(int) j5.getEntry(row, col)]++;
-//            }
-//            double[] h = Doubles.concat(h3, h5);
-//
-//            double sum = new Sum().evaluate(h);
-//            if ((int) sum != 0) {
-//                for (int k = 0; k < h.length; k++) {
-//                    h[k] = Math.sqrt(h[k] / sum);
-//                }
-//            }
-//
-//            feature.add(h);
-//        }
-//        return feature;
+    public void extract(BowImage bowImage) {
+        siltp(bowImage.image4, bowImage.sp4);
     }
 }

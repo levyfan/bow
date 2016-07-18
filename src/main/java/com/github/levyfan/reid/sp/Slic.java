@@ -30,7 +30,7 @@ public class Slic implements SuperPixelMethond {
         this.compactness = compactness;
     }
 
-    public SuperPixel[] slic(BufferedImage image) {
+    SuperPixel[] slic(BufferedImage image) {
         int sz = image.getHeight() * image.getWidth();
 
         //---------------------------

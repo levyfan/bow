@@ -6,16 +6,13 @@ import org.apache.commons.math3.stat.descriptive.summary.Sum;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author fanliwen
  */
-public class Hsv implements Feature {
+class Hsv implements Feature {
 
-    public List<double[]> hsv(BufferedImage image, SuperPixel[] sp) {
-        List<double[]> features = new ArrayList<>(sp.length);
+    private void hsv(BufferedImage image, SuperPixel[] sp) {
         for (SuperPixel aSp : sp) {
             double[] tempbin = new double[100];
             int[] rows = aSp.rows;
@@ -36,9 +33,8 @@ public class Hsv implements Feature {
                     tempbin[k] = Math.sqrt(tempbin[k] / sum);
                 }
             }
-            features.add(tempbin);
+            aSp.features.put(name(), tempbin);
         }
-        return features;
     }
 
     @Override
@@ -47,12 +43,7 @@ public class Hsv implements Feature {
     }
 
     @Override
-    public List<double[]> extract(BufferedImage image, SuperPixel[] sp) {
-        return hsv(image, sp);
-    }
-
-    @Override
-    public List<double[]> extract(BowImage bowImage) {
-        return extract(bowImage.image4, bowImage.sp4);
+    public void extract(BowImage bowImage) {
+        hsv(bowImage.image4, bowImage.sp4);
     }
 }

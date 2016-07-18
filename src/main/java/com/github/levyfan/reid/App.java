@@ -2,6 +2,7 @@ package com.github.levyfan.reid;
 
 import com.github.levyfan.reid.bow.Bow;
 import com.github.levyfan.reid.bow.BowManager;
+import com.github.levyfan.reid.bow.StripMethod;
 import com.github.levyfan.reid.codebook.CodeBook;
 import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.feature.FeatureManager;
@@ -38,13 +39,16 @@ import java.util.stream.Collectors;
  */
 public class App 
 {
+    static final Feature.Type[] types = new Feature.Type[]{
+            Feature.Type.HSV, Feature.Type.CN, Feature.Type.HOG, Feature.Type.SILTP};
+
     static final File training = new File("/data/reid/TUDpositive");
     private static final File testingA = new File("/data/reid/viper/cam_a/image");
     private static final File testingB = new File("/data/reid/viper/cam_b/image");
     private static final File maskA = new File("/data/reid/viper/mask/cam_a");
     private static final File maskB = new File("/data/reid/viper/mask/cam_b");
 
-    static final int numSuperpixels = 300;
+    static final int numSuperpixels = 600;
     static final double compactness = 20;
     private static final int codeBookSize = 350;
 
@@ -60,15 +64,21 @@ public class App
     SuperPixelMethond spMethod;
     FeatureManager featureManager;
     CodeBook codeBook;
+    private StripMethod stripMethod;
     private BowManager bowManager;
 
-    App() throws IOException, URISyntaxException {
+    App() throws IOException, URISyntaxException, ClassNotFoundException {
+        Map<Feature.Type, List<double[]>> codebook = this.loadCodeBookDat(
+                new File("codebook_slic_300_20.0.dat"));
+//        Map<Feature.Type, List<double[]>> codebook = app.loadCodeBookMat();
+
         this.spMethod = new Slic(numSuperpixels, compactness);
 //        this.spMethod = new PatchMethod(patchSize*4);
+
         this.featureManager = new FeatureManager();
         this.codeBook = new CodeBook(codeBookSize);
-        this.bowManager = new BowManager(
-                new Bow(K, sigma), this.featureManager, this.spMethod, ystep*4, stripLength*4);
+        this.stripMethod = new StripMethod(ystep*4, stripLength*4);
+        this.bowManager = new BowManager(new Bow(K, sigma, codebook), this.featureManager);
     }
 
     @SuppressWarnings("unchecked")
@@ -83,6 +93,7 @@ public class App
         MatFileReader reader = new MatFileReader(file);
 
         Map<Feature.Type, List<double[]>> codebooks = new EnumMap<>(Feature.Type.class);
+        //FIXME
         for (Feature.Type type : Feature.Type.values()) {
             MLStructure mlStructure = (MLStructure) reader.getMLArray("codebook_" + type);
             MLNumericArray ml = (MLNumericArray) mlStructure.getField("wordscenter");
@@ -100,7 +111,7 @@ public class App
         return codebooks;
     }
 
-    private List<Map<Feature.Type, double[]>> generateHist(File camFolder, File maskFoler, Map<Feature.Type, List<double[]>> codebook) throws IOException, ClassNotFoundException {
+    private List<BowImage> generateHist(File camFolder, File maskFoler) throws IOException, ClassNotFoundException {
         File[] camFiles = camFolder.listFiles(filter);
         return Lists.newArrayList(camFiles)
                 .parallelStream()
@@ -108,20 +119,22 @@ public class App
                     try {
                         BufferedImage image = ImageIO.read(camFile);
                         BufferedImage mask = ImageIO.read(new File(maskFoler, "mask_" + camFile.getName()));
-
                         System.out.println(camFile.getName());
-                        return bowManager.bow(image, mask, codebook);
+
+                        BowImage bowImage = new BowImage(spMethod, stripMethod, image, mask);
+                        bowManager.bow(bowImage);
+                        return bowImage;
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 }).collect(Collectors.toList());
     }
 
-    private List<double[]> fusion(List<Map<Feature.Type, double[]>> hists, Feature.Type[] types) {
-        return hists.stream().map(hist -> {
+    private List<double[]> fusion(List<BowImage> bowImages, Feature.Type[] types) {
+        return bowImages.stream().map(bowImage -> {
             double[][] features = new double[types.length][];
             for (int i = 0; i < types.length; i++) {
-                features[i] = hist.get(types[i]);
+                features[i] = bowImage.hist.get(types[i]);
             }
             return Doubles.concat(features);
         }).collect(Collectors.toList());
@@ -160,15 +173,11 @@ public class App
     public static void main( String[] args ) throws IOException, URISyntaxException, ClassNotFoundException {
         App app = new App();
 
-        Map<Feature.Type, List<double[]>> codebook = app.loadCodeBookDat(
-                new File("codebook_slic_400_20.0.dat"));
-//        Map<Feature.Type, List<double[]>> codebook = app.loadCodeBookMat();
+        List<BowImage> bowImagesA = app.generateHist(testingA, maskA);
+        List<BowImage> bowImagesB = app.generateHist(testingB, maskB);
 
-        List<Map<Feature.Type, double[]>> histRawA = app.generateHist(testingA, maskA, codebook);
-        List<Map<Feature.Type, double[]>> histRawB = app.generateHist(testingB, maskB, codebook);
-
-        List<double[]> histA = app.fusion(histRawA, Feature.Type.values());
-        List<double[]> histB = app.fusion(histRawB, Feature.Type.values());
+        List<double[]> histA = app.fusion(bowImagesA, types);
+        List<double[]> histB = app.fusion(bowImagesB, types);
 
         MLDouble a = new MLDouble("HistA", histA.toArray(new double[0][]));
         MLDouble b = new MLDouble("HistB", histB.toArray(new double[0][]));
@@ -176,17 +185,19 @@ public class App
                 "hist_" + numSuperpixels + "_" + compactness + ".mat",
                 Arrays.asList(a, b));
 
+        // non-pca
         RealMatrix score = app.calculateScore(histA, histB, false);
         double[] MR = new Viper().eval(score);
         System.out.println("fusion not_pca:" + Doubles.asList(MR).subList(0,50));
 
+        // pca
         score = app.calculateScore(histA, histB, true);
         MR = new Viper().eval(score);
         System.out.println("fusion pca:" + Doubles.asList(MR).subList(0,50));
 
         for (Feature.Type type : Feature.Type.values()) {
-            List<double[]> histTypeA = app.fusion(histRawA, new Feature.Type[]{type});
-            List<double[]> histTypeB = app.fusion(histRawB, new Feature.Type[]{type});
+            List<double[]> histTypeA = app.fusion(bowImagesA, new Feature.Type[]{type});
+            List<double[]> histTypeB = app.fusion(bowImagesB, new Feature.Type[]{type});
 
             RealMatrix scoreType = app.calculateScore(histTypeA, histTypeB, false);
             double[] scoreMR = new Viper().eval(scoreType);

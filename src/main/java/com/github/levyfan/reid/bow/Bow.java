@@ -1,7 +1,10 @@
 package com.github.levyfan.reid.bow;
 
 import com.github.levyfan.reid.BowImage;
+import com.github.levyfan.reid.feature.Feature;
+import com.github.levyfan.reid.sp.SuperPixel;
 import com.google.common.collect.TreeMultimap;
+import com.google.common.primitives.Doubles;
 import org.apache.commons.math3.util.MathArrays;
 import org.apache.commons.math3.util.Pair;
 
@@ -15,7 +18,7 @@ import java.util.Map;
  */
 public class Bow {
 
-    public static Pair<int[], double[]> vote(double[] feature, List<double[]> codebook, int K, double sigma) {
+    private static Pair<int[], double[]> vote(double[] feature, List<double[]> codebook, int K, double sigma) {
         TreeMultimap<Double, Integer> multimap = TreeMultimap.create();
         for (int i = 0; i < codebook.size(); i++) {
             multimap.put(MathArrays.distance(feature, codebook.get(i)), i);
@@ -34,38 +37,36 @@ public class Bow {
 
     private int K;
     private double sigma;
+    private Map<Feature.Type, List<double[]>> codebooks;
 
-    public Bow(int K, double sigma) {
+    public Bow(int K, double sigma, Map<Feature.Type, List<double[]>> codebooks) {
         this.K = K;
         this.sigma = sigma;
+        this.codebooks = codebooks;
     }
 
-    public List<double[]> bow(BowImage bowImage, List<double[]> feature, List<double[]> codebook) {
-        Strip[] strips = bowImage.strip4;
-        return bow(strips, feature, codebook);
-    }
+    void bow(BowImage bowImage, Feature.Type type) {
+        List<double[]> codebook = codebooks.get(type);
 
-    public List<double[]> bow(Strip[] strip, List<double[]> feature, List<double[]> codebook) {
         int[] tf = new int[codebook.size()];
-        List<int[]> words = new ArrayList<>(feature.size());
-        List<double[]> wwords = new ArrayList<>(feature.size());
-        for (double[] point : feature) {
-            Pair<int[], double[]> pair = vote(point, codebook, K, sigma);
+        List<int[]> words = new ArrayList<>(bowImage.sp4.length);
+        List<double[]> wwords = new ArrayList<>(bowImage.sp4.length);
+        for (SuperPixel superPixel : bowImage.sp4) {
+            Pair<int[], double[]> pair = vote(superPixel.features.get(type), codebook, K, sigma);
             words.add(pair.getFirst());
             wwords.add(pair.getSecond());
             for (int word : pair.getFirst()) {
                 tf[word] ++;
             }
         }
-
         for (int i = 0; i < tf.length; i ++) {
             if (tf[i] == 0) {
                 tf[i] = 1;
             }
         }
 
-        List<double[]> hist = new ArrayList<>(strip.length);
-        for (Strip aStrip : strip) {
+        List<double[]> hist = new ArrayList<>(bowImage.strip4.length);
+        for (Strip aStrip : bowImage.strip4) {
             double[] tempHist = new double[codebook.size()];
             for (int nsuperpixel : aStrip.superPixels) {
                 int[] word = words.get(nsuperpixel);
@@ -81,6 +82,6 @@ public class Bow {
             }
             hist.add(tempHist);
         }
-        return hist;
+        bowImage.hist.put(type, Doubles.concat(hist.toArray(new double[0][])));
     }
 }

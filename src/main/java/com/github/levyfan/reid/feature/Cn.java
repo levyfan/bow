@@ -15,17 +15,15 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author fanliwen
  */
-public class Cn implements Feature {
+class Cn implements Feature {
 
     private RealMatrix w2c;
 
-    public Cn() throws IOException, URISyntaxException {
+    Cn() throws IOException, URISyntaxException {
         File file = new File(this.getClass().getResource("/w2c.mat").toURI());
         MatFileReader reader = new MatFileReader(file);
         MLDouble array = (MLDouble) reader.getMLArray("w2c");
@@ -38,10 +36,9 @@ public class Cn implements Feature {
         }
     }
 
-    public List<double[]> cn(BufferedImage image, SuperPixel[] sp) {
+    private void cn(BufferedImage image, SuperPixel[] sp) {
         Table<Integer, Integer, double[]> table = im2c(image, w2c);
 
-        List<double[]> features = new ArrayList<>(sp.length);
         for (SuperPixel aSp : sp) {
             int[] rows = aSp.rows;
             int[] columns = aSp.cols;
@@ -55,12 +52,11 @@ public class Cn implements Feature {
             for (int k = 0; k < tempbin.length; k++) {
                 tempbin[k] = Math.sqrt(new Mean().evaluate(tempCN.getColumn(k)));
             }
-            features.add(tempbin);
+            aSp.features.put(name(), tempbin);
         }
-        return features;
     }
 
-    public static Table<Integer, Integer, double[]> im2c(BufferedImage image, RealMatrix w2c) {
+    private static Table<Integer, Integer, double[]> im2c(BufferedImage image, RealMatrix w2c) {
         Table<Integer, Integer, double[]> table = HashBasedTable.create();
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
@@ -78,12 +74,7 @@ public class Cn implements Feature {
     }
 
     @Override
-    public List<double[]> extract(BufferedImage image, SuperPixel[] sp) {
-        return cn(image, sp);
-    }
-
-    @Override
-    public List<double[]> extract(BowImage bowImage) {
-        return extract(bowImage.image4, bowImage.sp4);
+    public void extract(BowImage bowImage) {
+        cn(bowImage.image4, bowImage.sp4);
     }
 }

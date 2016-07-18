@@ -35,7 +35,7 @@ public class CodeBook {
                 KMeansPlusPlusClusterer.EmptyClusterStrategy.FARTHEST_POINT);
     }
 
-    public List<double[]> codebook(Collection<double[]> feature) {
+    List<double[]> codebook(Collection<double[]> feature) {
         List<DoublePoint> points = feature.stream()
                 .map(DoublePoint::new)
                 .collect(Collectors.toList());

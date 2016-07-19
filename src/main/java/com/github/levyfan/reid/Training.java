@@ -51,7 +51,7 @@ public class Training extends App {
                 }).collect(Collectors.toList());
     }
 
-    private List<double[]> fusion(List<BowImage> bowImages, Feature.Type[] types) {
+    private Iterable<double[]> fusion(List<BowImage> bowImages, Feature.Type[] types) {
         List<List<double[]>> list = bowImages.stream().map(bowImage -> {
             List<double[]> features = new ArrayList<>();
             for (SuperPixel superPixel : bowImage.sp4) {
@@ -64,11 +64,11 @@ public class Training extends App {
             return features;
         }).collect(Collectors.toList());
 
-        return Lists.newArrayList(Iterables.concat(list));
+        return Iterables.concat(list);
     }
 
     private Map<Feature.Type, List<double[]>> codeBookTraining(
-            File folder, Map<Feature.Type, List<double[]>> featureMap) throws IOException {
+            File folder, Map<Feature.Type, Iterable<double[]>> featureMap) throws IOException {
         Map<Feature.Type, List<double[]>> books = featureMap.entrySet()
                 .parallelStream()
                 .map(entry -> {
@@ -92,7 +92,7 @@ public class Training extends App {
 
         List<BowImage> bowImages = app.featureTraining(training);
 
-        Map<Feature.Type, List<double[]>> featureMap = new EnumMap<>(Feature.Type.class);
+        Map<Feature.Type, Iterable<double[]>> featureMap = new EnumMap<>(Feature.Type.class);
 //        featureMap.put(Feature.Type.HSV, app.fusion(bowImages, new Feature.Type[]{Feature.Type.HSV}));
 //        featureMap.put(Feature.Type.CN, app.fusion(bowImages, new Feature.Type[]{Feature.Type.CN}));
 //        featureMap.put(Feature.Type.HOG, app.fusion(bowImages, new Feature.Type[]{Feature.Type.HOG}));

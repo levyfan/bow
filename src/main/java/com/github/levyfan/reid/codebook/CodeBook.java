@@ -46,10 +46,11 @@ public class CodeBook {
                 .collect(Collectors.toList());
     }
 
-    public List<double[]> codebook_fast(Collection<double[]> feature) {
-        List<float[]> floatList = feature.stream()
-                .map(doubles -> Floats.toArray(Doubles.asList(doubles)))
-                .collect(Collectors.toList());
+    public List<double[]> codebook_fast(Iterable<double[]> feature) {
+        List<float[]> floatList = new ArrayList<>();
+        for (double[] doubles : feature) {
+            floatList.add(Floats.toArray(Doubles.asList(doubles)));
+        }
         float[] floats = Floats.concat(floatList.toArray(new float[0][]));
 
         opencv_core.Mat points = new opencv_core.Mat(

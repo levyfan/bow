@@ -74,7 +74,7 @@ public class Training extends App {
                 .map(entry -> {
                     System.out.println("codebook gen start " + entry.getKey());
 
-                    List<double[]> words = codeBook.codebook_fast(entry.getValue());
+                    List<double[]> words = codeBook.codebook(entry.getValue());
 
                     System.out.println("codebook gen done " + entry.getKey());
                     return Pair.create(entry.getKey(), words);

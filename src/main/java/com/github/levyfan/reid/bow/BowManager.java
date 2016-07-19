@@ -19,8 +19,10 @@ public class BowManager {
 
     public void bow(BowImage bowImage) {
         featureManager.feature(bowImage);
+        
         for (Feature feature : featureManager.getFeatures()) {
             bow.bow(bowImage, feature.name());
         }
+        bow.bow(bowImage, Feature.Type.ALL);
     }
 }

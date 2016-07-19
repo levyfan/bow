@@ -24,5 +24,11 @@ public class FeatureManager {
         for (Feature feature : features) {
             feature.extract(bowImage);
         }
+
+        // release memory
+        bowImage.image = null;
+        bowImage.image4 = null;
+        bowImage.mask = null;
+        bowImage.mask4 = null;
     }
 }

@@ -48,9 +48,9 @@ public class App
     private static final File maskA = new File("/data/reid/viper/mask/cam_a");
     private static final File maskB = new File("/data/reid/viper/mask/cam_b");
 
-    static final int numSuperpixels = 600;
+    static final int numSuperpixels = 500;
     static final double compactness = 20;
-    private static final int codeBookSize = 350;
+    private static final int codeBookSize = 350*4;
 
     private static final int K = 10;
     private static final double sigma = 3;
@@ -82,9 +82,12 @@ public class App
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Feature.Type, List<double[]>> loadCodeBookDat(File dat) throws IOException, ClassNotFoundException {
+    private Map<Feature.Type, List<double[]>> loadCodeBookDat(File dat) throws ClassNotFoundException {
         try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(dat))) {
             return  (Map<Feature.Type, List<double[]>>) is.readObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 

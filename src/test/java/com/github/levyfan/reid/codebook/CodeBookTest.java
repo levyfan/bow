@@ -32,12 +32,8 @@ public class CodeBookTest {
         }
 
         CodeBook codeBook = new CodeBook(3);
-        List<double[]> words = codeBook.codebook(feature);
-        for (double[] word : words) {
-            System.out.println(Arrays.toString(word));
-        }
 
-        List<double[]> words_fast = codeBook.codebook_fast(feature);
+        List<double[]> words_fast = codeBook.codebook(feature);
         for (double[] word : words_fast) {
             System.out.println(Arrays.toString(word));
         }

@@ -52,7 +52,19 @@ public class Bow {
         List<int[]> words = new ArrayList<>(bowImage.sp4.length);
         List<double[]> wwords = new ArrayList<>(bowImage.sp4.length);
         for (SuperPixel superPixel : bowImage.sp4) {
-            Pair<int[], double[]> pair = vote(superPixel.features.get(type), codebook, K, sigma);
+            double[] feature;
+            if (type == Feature.Type.ALL) {
+                feature = Doubles.concat(
+                        superPixel.features.get(Feature.Type.HSV),
+                        superPixel.features.get(Feature.Type.CN),
+                        superPixel.features.get(Feature.Type.HOG),
+                        superPixel.features.get(Feature.Type.SILTP)
+                );
+            } else {
+                feature = superPixel.features.get(type);
+            }
+
+            Pair<int[], double[]> pair = vote(feature, codebook, K, sigma);
             words.add(pair.getFirst());
             wwords.add(pair.getSecond());
             for (int word : pair.getFirst()) {

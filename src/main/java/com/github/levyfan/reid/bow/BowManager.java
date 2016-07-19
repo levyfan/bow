@@ -1,5 +1,6 @@
 package com.github.levyfan.reid.bow;
 
+import com.github.levyfan.reid.App;
 import com.github.levyfan.reid.BowImage;
 import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.feature.FeatureManager;
@@ -20,8 +21,8 @@ public class BowManager {
     public void bow(BowImage bowImage) {
         featureManager.feature(bowImage);
         
-        for (Feature feature : featureManager.getFeatures()) {
-            bow.bow(bowImage, feature.name());
+        for (Feature.Type type : App.types) {
+            bow.bow(bowImage, type);
         }
         bow.bow(bowImage, Feature.Type.ALL);
     }

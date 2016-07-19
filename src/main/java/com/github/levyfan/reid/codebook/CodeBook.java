@@ -14,13 +14,7 @@ import java.util.List;
  */
 public class CodeBook {
 
-    private int size;
-
-    public CodeBook(int size) {
-        this.size = size;
-    }
-
-    public List<double[]> codebook(Iterable<double[]> feature) {
+    public List<double[]> codebook(Iterable<double[]> feature, int size) {
         List<float[]> floatList = new ArrayList<>();
         for (double[] doubles : feature) {
             floatList.add(Floats.toArray(Doubles.asList(doubles)));

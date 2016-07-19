@@ -74,7 +74,8 @@ public class Training extends App {
                 .map(entry -> {
                     System.out.println("codebook gen start " + entry.getKey());
 
-                    List<double[]> words = codeBook.codebook(entry.getValue());
+                    List<double[]> words = codeBook.codebook(
+                            entry.getValue(), entry.getKey() == Feature.Type.ALL ? codeBookSize*4 : codeBookSize);
 
                     System.out.println("codebook gen done " + entry.getKey());
                     return Pair.create(entry.getKey(), words);
@@ -93,12 +94,14 @@ public class Training extends App {
         List<BowImage> bowImages = app.featureTraining(training);
 
         Map<Feature.Type, Iterable<double[]>> featureMap = new EnumMap<>(Feature.Type.class);
-//        featureMap.put(Feature.Type.HSV, app.fusion(bowImages, new Feature.Type[]{Feature.Type.HSV}));
-//        featureMap.put(Feature.Type.CN, app.fusion(bowImages, new Feature.Type[]{Feature.Type.CN}));
-//        featureMap.put(Feature.Type.HOG, app.fusion(bowImages, new Feature.Type[]{Feature.Type.HOG}));
-//        featureMap.put(Feature.Type.SILTP, app.fusion(bowImages, new Feature.Type[]{Feature.Type.SILTP}));
-        featureMap.put(Feature.Type.ALL, app.fusion(bowImages, new Feature.Type[]{
-                Feature.Type.HSV, Feature.Type.CN, Feature.Type.HOG, Feature.Type.SILTP}));
+        featureMap.put(Feature.Type.HSV, app.fusion(bowImages, new Feature.Type[]{Feature.Type.HSV}));
+        featureMap.put(Feature.Type.CN, app.fusion(bowImages, new Feature.Type[]{Feature.Type.CN}));
+        featureMap.put(Feature.Type.HOG, app.fusion(bowImages, new Feature.Type[]{Feature.Type.HOG}));
+        featureMap.put(Feature.Type.SILTP, app.fusion(bowImages, new Feature.Type[]{Feature.Type.SILTP}));
+        featureMap.put(Feature.Type.ALL, app.fusion(bowImages, types));
+
+        // clear bowImages to release memory
+        bowImages.clear();
 
         Map<Feature.Type, List<double[]>> codebookMap = app.codeBookTraining(training, featureMap);
 

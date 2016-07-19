@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  */
 public class App 
 {
-    static final Feature.Type[] types = new Feature.Type[]{
+    public static final Feature.Type[] types = new Feature.Type[]{
             Feature.Type.HSV, Feature.Type.CN, Feature.Type.HOG, Feature.Type.SILTP};
 
     static final File training = new File("/data/reid/TUDpositive");
@@ -50,7 +50,7 @@ public class App
 
     static final int numSuperpixels = 500;
     static final double compactness = 20;
-    private static final int codeBookSize = 350*4;
+    static final int codeBookSize = 350;
 
     private static final int K = 10;
     private static final double sigma = 3;
@@ -76,7 +76,7 @@ public class App
 //        this.spMethod = new PatchMethod(patchSize*4);
 
         this.featureManager = new FeatureManager();
-        this.codeBook = new CodeBook(codeBookSize);
+        this.codeBook = new CodeBook();
         this.stripMethod = new StripMethod(ystep*4, stripLength*4);
         this.bowManager = new BowManager(new Bow(K, sigma, codebook), this.featureManager);
     }

@@ -121,20 +121,24 @@ public class Training extends App {
         System.out.print("start translate to mat");
 
         new MatFileWriter().write(
-                "TUDpositive_feature_" + Feature.Type.HSV + numSuperpixels + "_" + compactness + ".mat",
-                Collections.singleton(new MLDouble("hsv", to(featureMap.get(Feature.Type.HSV)), hsvLength)));
+                "TUDpositive_feature_" + numSuperpixels + "_" + compactness + ".mat",
+                Lists.newArrayList(
+                        new MLDouble("hsv", to(featureMap.get(Feature.Type.HSV)), hsvLength),
+                        new MLDouble("cn", to(featureMap.get(Feature.Type.CN)), cnLength),
+                        new MLDouble("hog", to(featureMap.get(Feature.Type.HOG)), hogLength),
+                        new MLDouble("siltp", to(featureMap.get(Feature.Type.SILTP)), siltpLength)));
 
-        new MatFileWriter().write(
-                "TUDpositive_feature_" + Feature.Type.CN + numSuperpixels + "_" + compactness + ".mat",
-                Collections.singleton(new MLDouble("cn", to(featureMap.get(Feature.Type.CN)), cnLength)));
-
-        new MatFileWriter().write(
-                "TUDpositive_feature_" + Feature.Type.HOG + numSuperpixels + "_" + compactness + ".mat",
-                Collections.singleton(new MLDouble("hog", to(featureMap.get(Feature.Type.HOG)), hogLength)));
-
-        new MatFileWriter().write(
-                "TUDpositive_feature_" + Feature.Type.SILTP + numSuperpixels + "_" + compactness + ".mat",
-                Collections.singleton(new MLDouble("siltp", to(featureMap.get(Feature.Type.SILTP)), siltpLength)));
+//        new MatFileWriter().write(
+//                "TUDpositive_feature_" + Feature.Type.CN + numSuperpixels + "_" + compactness + ".mat",
+//                Collections.singleton(new MLDouble("cn", to(featureMap.get(Feature.Type.CN)), cnLength)));
+//
+//        new MatFileWriter().write(
+//                "TUDpositive_feature_" + Feature.Type.HOG + numSuperpixels + "_" + compactness + ".mat",
+//                Collections.singleton(new MLDouble("hog", to(featureMap.get(Feature.Type.HOG)), hogLength)));
+//
+//        new MatFileWriter().write(
+//                "TUDpositive_feature_" + Feature.Type.SILTP + numSuperpixels + "_" + compactness + ".mat",
+//                Collections.singleton(new MLDouble("siltp", to(featureMap.get(Feature.Type.SILTP)), siltpLength)));
 
 //        double[] all = Doubles.concat(Iterables.toArray(featureMap.get(Feature.Type.ALL), double[].class));
 

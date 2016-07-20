@@ -69,7 +69,7 @@ public class App
 
     App() throws IOException, URISyntaxException, ClassNotFoundException {
         Map<Feature.Type, List<double[]>> codebook = this.loadCodeBookDat(
-                new File("codebook_slic_300_20.0.dat"));
+                new File("codebook_wordlevel_slic_500_20.0.dat"));
 //        Map<Feature.Type, List<double[]>> codebook = app.loadCodeBookMat();
 
         this.spMethod = new Slic(numSuperpixels, compactness);
@@ -134,29 +134,25 @@ public class App
     }
 
     private List<double[]> fusion(List<BowImage> bowImages, Feature.Type[] types) {
-        return bowImages.stream().map(bowImage -> {
+        List<double[]> hists = bowImages.stream().map(bowImage -> {
             double[][] features = new double[types.length][];
             for (int i = 0; i < types.length; i++) {
                 features[i] = bowImage.hist.get(types[i]);
             }
             return Doubles.concat(features);
         }).collect(Collectors.toList());
+
+        hists.stream().forEach(hist -> {
+            double sum = Math.sqrt(new SumOfSquares().evaluate(hist));
+            for (int i = 0; i < hist.length; i++) {
+                hist[i] = hist[i] / sum;
+            }
+        });
+
+        return hists;
     }
 
     private RealMatrix calculateScore(List<double[]> histA, List<double[]> histB, boolean enablePCA) {
-        histA.stream().forEach(hist -> {
-            double sum = Math.sqrt(new SumOfSquares().evaluate(hist));
-            for (int i = 0; i < hist.length; i++) {
-                hist[i] = hist[i] / sum;
-            }
-        });
-        histB.stream().forEach(hist -> {
-            double sum = Math.sqrt(new SumOfSquares().evaluate(hist));
-            for (int i = 0; i < hist.length; i++) {
-                hist[i] = hist[i] / sum;
-            }
-        });
-
         if (enablePCA) {
             List<double[]> hist = Lists.newArrayList(Iterables.concat(histA, histB));
             BlasPca pca = new BlasPca(hist);
@@ -182,6 +178,7 @@ public class App
         List<double[]> histA = app.fusion(bowImagesA, types);
         List<double[]> histB = app.fusion(bowImagesB, types);
 
+        // write to mat
         MLDouble a = new MLDouble("HistA", histA.toArray(new double[0][]));
         MLDouble b = new MLDouble("HistB", histB.toArray(new double[0][]));
         new MatFileWriter().write(
@@ -189,22 +186,40 @@ public class App
                 Arrays.asList(a, b));
 
         // non-pca
-        RealMatrix score = app.calculateScore(histA, histB, false);
-        double[] MR = new Viper().eval(score);
-        System.out.println("fusion not_pca:" + Doubles.asList(MR).subList(0,50));
+        double[] MR = new Viper().eval(app.calculateScore(histA, histB, false));
+        System.out.println("descriptorLevel not_pca:" + Doubles.asList(MR).subList(0, 50));
 
         // pca
-        score = app.calculateScore(histA, histB, true);
-        MR = new Viper().eval(score);
-        System.out.println("fusion pca:" + Doubles.asList(MR).subList(0,50));
+        MR = new Viper().eval(app.calculateScore(histA, histB, true));
+        System.out.println("descriptorLevel pca:" + Doubles.asList(MR).subList(0, 50));
 
-        for (Feature.Type type : Feature.Type.values()) {
-            List<double[]> histTypeA = app.fusion(bowImagesA, new Feature.Type[]{type});
-            List<double[]> histTypeB = app.fusion(bowImagesB, new Feature.Type[]{type});
+        // word level fusion
+        histA = app.fusion(bowImagesA, new Feature.Type[]{Feature.Type.ALL});
+        histB = app.fusion(bowImagesB, new Feature.Type[]{Feature.Type.ALL});
+        MR = new Viper().eval(app.calculateScore(histA, histB, true));
+        System.out.println("wordLevel:" + Doubles.asList(MR).subList(0, 50));
 
-            RealMatrix scoreType = app.calculateScore(histTypeA, histTypeB, false);
-            double[] scoreMR = new Viper().eval(scoreType);
-            System.out.println(type + ":" + Doubles.asList(scoreMR).subList(0,50));
+        // separate
+        RealMatrix[] scores = new RealMatrix[types.length];
+        for (Feature.Type type : types) {
+            histA = app.fusion(bowImagesA, new Feature.Type[]{type});
+            histB = app.fusion(bowImagesB, new Feature.Type[]{type});
+            scores[type.ordinal()] = app.calculateScore(histA, histB, false);
+            MR = new Viper().eval(scores[type.ordinal()]);
+            System.out.println(type + ":" + Doubles.asList(MR).subList(0,50));
         }
+
+        // score level fusion
+        RealMatrix score = MatrixUtils.createRealMatrix(
+                scores[0].getRowDimension(), scores[0].getColumnDimension());
+        for (int row = 0; row < score.getRowDimension(); row++) {
+            for (int col = 0; col < score.getColumnDimension(); col++) {
+                double value = scores[0].getEntry(row, col) * scores[1].getEntry(row, col)
+                        * scores[2].getEntry(row, col) * scores[3].getEntry(row, col);
+                score.setEntry(row, col, Math.sqrt(Math.sqrt(value)));
+            }
+        }
+        MR = new Viper().eval(score);
+        System.out.println("scoreLevel:" + Doubles.asList(MR).subList(0,50));
     }
 }

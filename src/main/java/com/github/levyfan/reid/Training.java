@@ -6,7 +6,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Doubles;
 import com.jmatio.io.MatFileWriter;
-import com.jmatio.types.MLArray;
 import com.jmatio.types.MLDouble;
 import org.apache.commons.math3.util.Pair;
 
@@ -118,22 +117,26 @@ public class Training extends App {
         // clear bowImages to release memory
         bowImages.clear();
 
-        MLDouble hsv = new MLDouble("hsv", to(featureMap.get(Feature.Type.HSV)), hsvLength);
-        MLDouble cn = new MLDouble("cn", to(featureMap.get(Feature.Type.CN)), cnLength);
-        MLDouble hog = new MLDouble("hog", to(featureMap.get(Feature.Type.HOG)), hogLength);
-        MLDouble siltp = new MLDouble("siltp", to(featureMap.get(Feature.Type.SILTP)), siltpLength);
-//        double[] all = Doubles.concat(Iterables.toArray(featureMap.get(Feature.Type.ALL), double[].class));
-        featureMap.clear();
-
         // save feature map to mat file
         System.out.print("start translate to mat");
-        List<MLArray> mlArrays = Lists.newArrayList(hsv, cn, hog, siltp
-//                new MLDouble("all", Doubles.asList(all).toArray(new Double[0]), allLength)
-        );
-        System.out.print("start writing mat");
+
         new MatFileWriter().write(
-                "TUDpositive_feature_" + numSuperpixels + "_" + compactness + ".mat",
-                mlArrays);
+                "TUDpositive_feature_" + Feature.Type.HSV + numSuperpixels + "_" + compactness + ".mat",
+                Collections.singleton(new MLDouble("hsv", to(featureMap.get(Feature.Type.HSV)), hsvLength)));
+
+        new MatFileWriter().write(
+                "TUDpositive_feature_" + Feature.Type.CN + numSuperpixels + "_" + compactness + ".mat",
+                Collections.singleton(new MLDouble("cn", to(featureMap.get(Feature.Type.CN)), cnLength)));
+
+        new MatFileWriter().write(
+                "TUDpositive_feature_" + Feature.Type.HOG + numSuperpixels + "_" + compactness + ".mat",
+                Collections.singleton(new MLDouble("hog", to(featureMap.get(Feature.Type.HOG)), hogLength)));
+
+        new MatFileWriter().write(
+                "TUDpositive_feature_" + Feature.Type.SILTP + numSuperpixels + "_" + compactness + ".mat",
+                Collections.singleton(new MLDouble("siltp", to(featureMap.get(Feature.Type.SILTP)), siltpLength)));
+
+//        double[] all = Doubles.concat(Iterables.toArray(featureMap.get(Feature.Type.ALL), double[].class));
 
         // code book training
 //        Map<Feature.Type, List<double[]>> codebookMap = app.codeBookTraining(training, featureMap);

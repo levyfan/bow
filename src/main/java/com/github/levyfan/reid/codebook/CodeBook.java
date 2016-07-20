@@ -34,7 +34,7 @@ public class CodeBook {
                 points,
                 size,
                 labels,
-                new opencv_core.TermCriteria(opencv_core.TermCriteria.MAX_ITER),
+                new opencv_core.TermCriteria(opencv_core.TermCriteria.MAX_ITER, 100, 0),
                 1,
                 opencv_core.KMEANS_PP_CENTERS,
                 centers);

@@ -81,7 +81,7 @@ public class Training extends App {
                     return Pair.create(entry.getKey(), words);
                 }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
 
-        File dat = new File(folder, "codebook_wordlevel_slic_" + numSuperpixels + "_" + compactness + ".dat");
+        File dat = new File(folder, "codebook_wordlevel_fix_slic_" + numSuperpixels + "_" + compactness + ".dat");
         try (ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(dat))) {
             os.writeObject(books);
         }
@@ -110,7 +110,7 @@ public class Training extends App {
                 .map(entry -> new MLDouble(entry.getKey().name(), entry.getValue().toArray(new double[0][])))
                 .collect(Collectors.toList());
         new MatFileWriter().write(
-                "codebook_wordlevel_" + numSuperpixels + "_" + compactness + ".mat",
+                "codebook_wordlevel_fix_" + numSuperpixels + "_" + compactness + ".mat",
                 mlArrays);
     }
 }

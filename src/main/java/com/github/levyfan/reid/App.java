@@ -193,7 +193,7 @@ public class App
         // word level fusion
         histA = app.fusion(bowImagesA, new Feature.Type[]{Feature.Type.ALL});
         histB = app.fusion(bowImagesB, new Feature.Type[]{Feature.Type.ALL});
-        MR = new Viper().eval(app.calculateScore(histA, histB, true));
+        MR = new Viper().eval(app.calculateScore(histA, histB, false));
         System.out.println("wordLevel:" + Doubles.asList(MR).subList(0, 50));
 
         // separate

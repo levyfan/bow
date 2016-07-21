@@ -19,7 +19,6 @@ import com.jmatio.io.MatFileReader;
 import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLDouble;
 import com.jmatio.types.MLNumericArray;
-import com.jmatio.types.MLStructure;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.descriptive.summary.SumOfSquares;
@@ -68,9 +67,10 @@ public class App
     private BowManager bowManager;
 
     App() throws IOException, URISyntaxException, ClassNotFoundException {
-        Map<Feature.Type, List<double[]>> codebook = this.loadCodeBookDat(
-                new File("codebook_wordlevel_slic_500_20.0.dat"));
-//        Map<Feature.Type, List<double[]>> codebook = app.loadCodeBookMat();
+//        Map<Feature.Type, List<double[]>> codebook = this.loadCodeBookDat(
+//                new File("codebook_wordlevel_slic_500_20.0.dat"));
+        Map<Feature.Type, List<double[]>> codebook = this.loadCodeBookMat(
+                new File("codebook.mat"));
 
         this.spMethod = new Slic(numSuperpixels, compactness);
 //        this.spMethod = new PatchMethod(patchSize*4);
@@ -91,15 +91,12 @@ public class App
         }
     }
 
-    private Map<Feature.Type, List<double[]>> loadCodeBookMat() throws URISyntaxException, IOException {
-        File file = new File(this.getClass().getResource("/sp_codebook.mat").toURI());
-        MatFileReader reader = new MatFileReader(file);
+    private Map<Feature.Type, List<double[]>> loadCodeBookMat(File mat) throws URISyntaxException, IOException {
+        MatFileReader reader = new MatFileReader(mat);
 
         Map<Feature.Type, List<double[]>> codebooks = new EnumMap<>(Feature.Type.class);
-        //FIXME
         for (Feature.Type type : Feature.Type.values()) {
-            MLStructure mlStructure = (MLStructure) reader.getMLArray("codebook_" + type);
-            MLNumericArray ml = (MLNumericArray) mlStructure.getField("wordscenter");
+            MLNumericArray ml = (MLNumericArray) reader.getMLArray("codebook_" + type);
 
             List<double[]> codebook = new ArrayList<>();
             for (int i = 0; i < ml.getM(); i++) {

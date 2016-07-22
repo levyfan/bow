@@ -21,6 +21,8 @@ import com.jmatio.types.MLDouble;
 import com.jmatio.types.MLNumericArray;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.stat.descriptive.rank.Max;
 import org.apache.commons.math3.stat.descriptive.summary.SumOfSquares;
 import org.jblas.DoubleMatrix;
 import org.jblas.ranges.IntervalRange;
@@ -79,7 +81,7 @@ public class App
         this.featureManager = new FeatureManager();
         this.codeBook = new CodeBook();
         this.stripMethod = new StripMethod(ystep*4, stripLength*4, pstep*4);
-        this.bowManager = new BowManager(new Bow(K, sigma, codebook), this.featureManager);
+        this.bowManager = new BowManager(new Bow(K, sigma, codebook, new Mean()), this.featureManager);
     }
 
     @SuppressWarnings("unchecked")

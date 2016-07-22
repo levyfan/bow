@@ -5,6 +5,8 @@ import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.sp.SuperPixel;
 import com.google.common.collect.TreeMultimap;
 import com.google.common.primitives.Doubles;
+import org.apache.commons.math3.stat.descriptive.UnivariateStatistic;
+import org.apache.commons.math3.stat.descriptive.rank.Max;
 import org.apache.commons.math3.util.MathArrays;
 import org.apache.commons.math3.util.Pair;
 
@@ -38,11 +40,13 @@ public class Bow {
     private int K;
     private double sigma;
     private Map<Feature.Type, List<double[]>> codebooks;
+    private UnivariateStatistic pooling;
 
-    public Bow(int K, double sigma, Map<Feature.Type, List<double[]>> codebooks) {
+    public Bow(int K, double sigma, Map<Feature.Type, List<double[]>> codebooks, UnivariateStatistic pooling) {
         this.K = K;
         this.sigma = sigma;
         this.codebooks = codebooks;
+        this.pooling = pooling;
     }
 
     void bow(BowImage bowImage, Feature.Type type) {
@@ -113,7 +117,7 @@ public class Bow {
 
             // max pooling
             for (int i = 0; i < tempHist.length; i++) {
-                tempHist[i] = Math.max(Math.max(lowTempHist[i], highTempHist[i]), tempHist[i]);
+                tempHist[i] = pooling.evaluate(new double[]{lowTempHist[i], highTempHist[i], tempHist[i]});
             }
 
             for (int i = 0; i < tempHist.length; i++) {

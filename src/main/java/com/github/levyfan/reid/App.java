@@ -55,6 +55,7 @@ public class App
     private static final double sigma = 3;
     private static final int ystep = 8;
     private static final int stripLength = 8;
+    private static final int pstep = 2;
     private static final int patchSize = 4;
 
     static final PatternFilenameFilter filter =
@@ -67,17 +68,17 @@ public class App
     private BowManager bowManager;
 
     App() throws IOException, URISyntaxException, ClassNotFoundException {
-//        Map<Feature.Type, List<double[]>> codebook = this.loadCodeBookDat(
-//                new File("codebook_wordlevel_slic_500_20.0.dat"));
-        Map<Feature.Type, List<double[]>> codebook = this.loadCodeBookMat(
-                new File("codebook.mat"));
+        Map<Feature.Type, List<double[]>> codebook = this.loadCodeBookDat(
+                new File("codebook_wordlevel_slic_500_20.0.dat"));
+//        Map<Feature.Type, List<double[]>> codebook = this.loadCodeBookMat(
+//                new File("codebook.mat"));
 
         this.spMethod = new Slic(numSuperpixels, compactness);
 //        this.spMethod = new PatchMethod(patchSize*4);
 
         this.featureManager = new FeatureManager();
         this.codeBook = new CodeBook();
-        this.stripMethod = new StripMethod(ystep*4, stripLength*4);
+        this.stripMethod = new StripMethod(ystep*4, stripLength*4, pstep*4);
         this.bowManager = new BowManager(new Bow(K, sigma, codebook), this.featureManager);
     }
 

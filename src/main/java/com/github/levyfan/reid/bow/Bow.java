@@ -89,6 +89,33 @@ public class Bow {
                 }
             }
 
+            // pooling low
+            double[] lowTempHist = new double[codebook.size()];
+            for (int nsuperpixel : aStrip.lowSuperPixels) {
+                int[] word = words.get(nsuperpixel);
+                double[] wword = wwords.get(nsuperpixel);
+
+                for (int i = 0; i < word.length; i++) {
+                    lowTempHist[word[i]] += wword[i];
+                }
+            }
+
+            // pooling high
+            double[] highTempHist = new double[codebook.size()];
+            for (int nsuperpixel : aStrip.highSuperPixels) {
+                int[] word = words.get(nsuperpixel);
+                double[] wword = wwords.get(nsuperpixel);
+
+                for (int i = 0; i < word.length; i++) {
+                    highTempHist[word[i]] += wword[i];
+                }
+            }
+
+            // max pooling
+            for (int i = 0; i < tempHist.length; i++) {
+                tempHist[i] = Math.max(Math.max(lowTempHist[i], highTempHist[i]), tempHist[i]);
+            }
+
             for (int i = 0; i < tempHist.length; i++) {
                 tempHist[i] = tempHist[i] / Math.sqrt(tf[i]);
             }

@@ -1,5 +1,6 @@
 package com.github.levyfan.reid;
 
+import com.github.levyfan.reid.util.ImageUtils;
 import org.junit.Test;
 
 import javax.imageio.ImageIO;

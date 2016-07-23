@@ -77,4 +77,9 @@ class Cn implements Feature {
     public void extract(BowImage bowImage) {
         cn(bowImage.image4, bowImage.sp4);
     }
+
+    @Override
+    public String toString() {
+        return "Cn{}";
+    }
 }

@@ -1,14 +1,21 @@
-package com.github.levyfan.reid.viper;
+package com.github.levyfan.reid.eval;
 
+import com.github.levyfan.reid.pca.BlasPca;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.util.Pair;
+import org.jblas.DoubleMatrix;
+import org.jblas.ranges.IntervalRange;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * @author fanliwen
@@ -72,5 +79,25 @@ public class Viper {
             MR[row] = new Mean().evaluate(accuracy.getRow(row))/lookrank/2;
         }
         return MR;
+    }
+
+    public Pair<double[], RealMatrix> eval(List<double[]> histA, List<double[]> histB, boolean enablePCA) {
+        RealMatrix score;
+        if (enablePCA) {
+            List<double[]> hist = Lists.newArrayList(Iterables.concat(histA, histB));
+            BlasPca pca = new BlasPca(hist);
+
+            DoubleMatrix histPcaA = pca.ux.get(
+                    new IntervalRange(0, pca.ux.getRows()), new IntervalRange(0, histA.size()));
+            DoubleMatrix histPcaB = pca.ux.get(
+                    new IntervalRange(0, pca.ux.getRows()), new IntervalRange(histA.size(), hist.size()));
+            score = MatrixUtils.createRealMatrix(
+                    histPcaA.transpose().mmul(histPcaB).toArray2());
+        } else {
+            score = MatrixUtils.createRealMatrix(histA.toArray(new double[0][]))
+                    .multiply(MatrixUtils.createRealMatrix(histB.toArray(new double[0][])).transpose());
+        }
+
+        return Pair.create(eval(score), score);
     }
 }

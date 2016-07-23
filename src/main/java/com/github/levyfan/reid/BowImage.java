@@ -5,6 +5,7 @@ import com.github.levyfan.reid.bow.StripMethod;
 import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.sp.SuperPixel;
 import com.github.levyfan.reid.sp.SuperPixelMethond;
+import com.github.levyfan.reid.util.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.util.EnumMap;

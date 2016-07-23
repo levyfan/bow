@@ -42,4 +42,11 @@ public class PatchMethod implements SuperPixelMethond {
     public SuperPixel[] generate(BufferedImage image) {
         return patch(image);
     }
+
+    @Override
+    public String toString() {
+        return "PatchMethod{" +
+                "size=" + size +
+                '}';
+    }
 }

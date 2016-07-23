@@ -15,9 +15,9 @@ import java.awt.image.BufferedImage;
  */
 class Hog implements Feature {
 
-    private static final int LEN = 9;
+    private final int len = 9;
 
-    private static Pair<RealMatrix, RealMatrix> hog(BufferedImage image) {
+    private static Pair<RealMatrix, RealMatrix> hog(BufferedImage image, int len) {
         RealMatrix matrix = MatrixUtils.createRealMatrix(image.getHeight(), image.getWidth());
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
@@ -65,8 +65,8 @@ class Hog implements Feature {
                 if (percent < 0) {
                     percent ++;
                 }
-                double v = Math.ceil(LEN * percent);
-                orient.setEntry(i, j, Math.max(Math.min(v, LEN), 1));
+                double v = Math.ceil(len * percent);
+                orient.setEntry(i, j, Math.max(Math.min(v, len), 1));
             }
         }
 
@@ -74,12 +74,12 @@ class Hog implements Feature {
     }
 
     private void hog(BufferedImage image, SuperPixel[] sp) {
-        Pair<RealMatrix, RealMatrix> pair = Hog.hog(image);
+        Pair<RealMatrix, RealMatrix> pair = Hog.hog(image, len);
         RealMatrix orient = pair.getFirst();
         RealMatrix gradient = pair.getSecond();
 
         for (SuperPixel aSp : sp) {
-            double[] tmpBin = new double[LEN];
+            double[] tmpBin = new double[len];
             for (int k = 0; k < aSp.rows.length; k++) {
                 int i = aSp.rows[k];
                 int j = aSp.cols[k];
@@ -100,6 +100,13 @@ class Hog implements Feature {
     @Override
     public Type name() {
         return Type.HOG;
+    }
+
+    @Override
+    public String toString() {
+        return "Hog{" +
+                "len=" + len +
+                '}';
     }
 
     @Override

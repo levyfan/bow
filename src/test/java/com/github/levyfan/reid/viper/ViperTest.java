@@ -1,5 +1,6 @@
 package com.github.levyfan.reid.viper;
 
+import com.github.levyfan.reid.eval.Viper;
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
 import org.apache.commons.math3.linear.MatrixUtils;

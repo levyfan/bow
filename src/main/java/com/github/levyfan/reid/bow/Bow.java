@@ -6,7 +6,6 @@ import com.github.levyfan.reid.sp.SuperPixel;
 import com.google.common.collect.TreeMultimap;
 import com.google.common.primitives.Doubles;
 import org.apache.commons.math3.stat.descriptive.UnivariateStatistic;
-import org.apache.commons.math3.stat.descriptive.rank.Max;
 import org.apache.commons.math3.util.MathArrays;
 import org.apache.commons.math3.util.Pair;
 
@@ -115,7 +114,7 @@ public class Bow {
                 }
             }
 
-            // max pooling
+            // pooling
             for (int i = 0; i < tempHist.length; i++) {
                 tempHist[i] = pooling.evaluate(new double[]{lowTempHist[i], highTempHist[i], tempHist[i]});
             }
@@ -126,5 +125,14 @@ public class Bow {
             hist.add(tempHist);
         }
         bowImage.hist.put(type, Doubles.concat(hist.toArray(new double[0][])));
+    }
+
+    @Override
+    public String toString() {
+        return "Bow{" +
+                "K=" + K +
+                ", sigma=" + sigma +
+                ", pooling=" + pooling +
+                '}';
     }
 }

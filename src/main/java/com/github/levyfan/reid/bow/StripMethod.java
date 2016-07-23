@@ -82,4 +82,13 @@ public class StripMethod {
         }
         return strips;
     }
+
+    @Override
+    public String toString() {
+        return "StripMethod{" +
+                "ystep=" + ystep +
+                ", length=" + length +
+                ", pstep=" + pstep +
+                '}';
+    }
 }

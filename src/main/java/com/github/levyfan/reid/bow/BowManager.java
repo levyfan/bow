@@ -12,10 +12,12 @@ public class BowManager {
 
     private Bow bow;
     private FeatureManager featureManager;
+    private boolean wordLevel;
 
-    public BowManager(Bow bow, FeatureManager featureManager) {
+    public BowManager(Bow bow, FeatureManager featureManager, boolean wordLevel) {
         this.bow = bow;
         this.featureManager = featureManager;
+        this.wordLevel = wordLevel;
     }
 
     public void bow(BowImage bowImage) {
@@ -24,6 +26,21 @@ public class BowManager {
         for (Feature.Type type : App.types) {
             bow.bow(bowImage, type);
         }
-        bow.bow(bowImage, Feature.Type.ALL);
+
+        if (wordLevel) {
+            bow.bow(bowImage, Feature.Type.ALL);
+        }
+
+        bowImage.sp4 = null;
+        bowImage.strip4 = null;
+    }
+
+    @Override
+    public String toString() {
+        return "BowManager{" +
+                "bow=" + bow +
+                ", featureManager=" + featureManager +
+                ", wordLevel=" + wordLevel +
+                '}';
     }
 }

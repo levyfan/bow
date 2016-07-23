@@ -22,9 +22,11 @@ import java.util.stream.Collectors;
 /**
  * @author fanliwen
  */
-public class Training extends App {
+public class TrainingApp extends App {
 
-    private Training() throws IOException, URISyntaxException, ClassNotFoundException {
+    private static final File training = new File("/data/reid/TUDpositive");
+
+    private TrainingApp() throws IOException, URISyntaxException, ClassNotFoundException {
         super();
     }
 
@@ -47,7 +49,8 @@ public class Training extends App {
                 }).collect(Collectors.toList());
     }
 
-    private Iterable<double[]> fusion(List<BowImage> bowImages, Feature.Type[] types) {
+    @Override
+    Iterable<double[]> fusion(List<BowImage> bowImages, Feature.Type[] types) {
         List<List<double[]>> list = bowImages.stream().map(bowImage -> {
             List<double[]> features = new ArrayList<>();
             for (SuperPixel superPixel : bowImage.sp4) {
@@ -95,7 +98,7 @@ public class Training extends App {
     }
 
     public static void main(String[] args) throws IOException, URISyntaxException, ClassNotFoundException {
-        Training app = new Training();
+        TrainingApp app = new TrainingApp();
 
         // extract feature
         List<BowImage> bowImages = app.featureTraining(training);
@@ -106,13 +109,11 @@ public class Training extends App {
         featureMap.put(Feature.Type.CN, app.fusion(bowImages, new Feature.Type[]{Feature.Type.CN}));
         featureMap.put(Feature.Type.HOG, app.fusion(bowImages, new Feature.Type[]{Feature.Type.HOG}));
         featureMap.put(Feature.Type.SILTP, app.fusion(bowImages, new Feature.Type[]{Feature.Type.SILTP}));
-//        featureMap.put(Feature.Type.ALL, app.fusion(bowImages, types));
 
         int hsvLength = bowImages.get(0).sp4[0].features.get(Feature.Type.HSV).length;
         int cnLength = bowImages.get(0).sp4[0].features.get(Feature.Type.CN).length;
         int hogLength = bowImages.get(0).sp4[0].features.get(Feature.Type.HOG).length;
         int siltpLength = bowImages.get(0).sp4[0].features.get(Feature.Type.SILTP).length;
-//        int allLength = hsvLength + cnLength + hogLength + siltpLength;
 
         // clear bowImages to release memory
         bowImages.clear();
@@ -127,20 +128,6 @@ public class Training extends App {
                         new MLDouble("cn", to(featureMap.get(Feature.Type.CN)), cnLength),
                         new MLDouble("hog", to(featureMap.get(Feature.Type.HOG)), hogLength),
                         new MLDouble("siltp", to(featureMap.get(Feature.Type.SILTP)), siltpLength)));
-
-//        new MatFileWriter().write(
-//                "TUDpositive_feature_" + Feature.Type.CN + numSuperpixels + "_" + compactness + ".mat",
-//                Collections.singleton(new MLDouble("cn", to(featureMap.get(Feature.Type.CN)), cnLength)));
-//
-//        new MatFileWriter().write(
-//                "TUDpositive_feature_" + Feature.Type.HOG + numSuperpixels + "_" + compactness + ".mat",
-//                Collections.singleton(new MLDouble("hog", to(featureMap.get(Feature.Type.HOG)), hogLength)));
-//
-//        new MatFileWriter().write(
-//                "TUDpositive_feature_" + Feature.Type.SILTP + numSuperpixels + "_" + compactness + ".mat",
-//                Collections.singleton(new MLDouble("siltp", to(featureMap.get(Feature.Type.SILTP)), siltpLength)));
-
-//        double[] all = Doubles.concat(Iterables.toArray(featureMap.get(Feature.Type.ALL), double[].class));
 
         // code book training
 //        Map<Feature.Type, List<double[]>> codebookMap = app.codeBookTraining(training, featureMap);

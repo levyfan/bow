@@ -38,6 +38,11 @@ class Hsv implements Feature {
     }
 
     @Override
+    public String toString() {
+        return "Hsv{}";
+    }
+
+    @Override
     public Type name() {
         return Type.HSV;
     }

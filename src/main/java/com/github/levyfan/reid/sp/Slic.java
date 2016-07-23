@@ -342,4 +342,12 @@ public class Slic implements SuperPixelMethond {
     public SuperPixel[] generate(BufferedImage image) {
         return slic(image);
     }
+
+    @Override
+    public String toString() {
+        return "Slic{" +
+                "numSuperpixels=" + numSuperpixels +
+                ", compactness=" + compactness +
+                '}';
+    }
 }

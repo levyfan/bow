@@ -111,4 +111,9 @@ class Siltp implements Feature {
     public void extract(BowImage bowImage) {
         siltp(bowImage.image4, bowImage.sp4);
     }
+
+    @Override
+    public String toString() {
+        return "Siltp{}";
+    }
 }

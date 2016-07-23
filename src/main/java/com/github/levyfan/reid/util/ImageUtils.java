@@ -1,4 +1,4 @@
-package com.github.levyfan.reid;
+package com.github.levyfan.reid.util;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

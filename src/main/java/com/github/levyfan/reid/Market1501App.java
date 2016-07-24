@@ -3,15 +3,17 @@ package com.github.levyfan.reid;
 import com.github.levyfan.reid.eval.Market1501;
 import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.util.MatrixUtils;
+import com.google.common.base.Joiner;
+import com.google.common.primitives.Doubles;
 import com.jmatio.io.MatFileWriter;
 import org.apache.commons.math3.util.Pair;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author fanliwen
@@ -52,15 +54,20 @@ public class Market1501App extends App {
         List<double[]> queryHist = (List<double[]>) app.fusion(queryBowImages, types);
         List<double[]> testHist = (List<double[]>) app.fusion(testBowImages, types);
 
-        // write to mat
-        System.out.println("write hist to mat");
+        // write to mat/csv
+        System.out.println("write query hist to mat");
         new MatFileWriter().write(
-                "market1501_hist_" + numSuperpixels + "_" + compactness + ".mat",
-                Arrays.asList(
-                        MatrixUtils.to("Hist_query", queryHist),
-                        MatrixUtils.to("Hist_test", testHist)
-                )
+                "market1501_hist_query_" + numSuperpixels + "_" + compactness + ".mat",
+                Collections.singleton(MatrixUtils.to("Hist_query", queryHist))
         );
+        System.out.println("write test hist to cvs");
+        try (FileOutputStream os = new FileOutputStream(
+                "market1501_hist_test_" + numSuperpixels + "_" + compactness + ".csv");
+             PrintWriter writer = new PrintWriter(os, true)) {
+            for (double[] hist : testHist) {
+                writer.println(Joiner.on(',').join(Doubles.asList(hist)));
+            }
+        }
 
         List<Pair<Integer, Integer>> queryIdAndCam = app.idAndCam(queryCamFolder);
         List<Pair<Integer, Integer>> testIdAndCam = app.idAndCam(testCamFolder);

@@ -2,11 +2,11 @@ package com.github.levyfan.reid;
 
 import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.sp.SuperPixel;
+import com.github.levyfan.reid.util.MatrixUtils;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Doubles;
 import com.jmatio.io.MatFileWriter;
-import com.jmatio.types.MLDouble;
 import org.apache.commons.math3.util.Pair;
 
 import javax.imageio.ImageIO;
@@ -16,7 +16,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -87,16 +90,6 @@ public class TrainingApp extends App {
         return books;
     }
 
-    private static Double[] to(Iterable<double[]> iterable) {
-        int size = Iterables.size(iterable) * Iterables.getFirst(iterable, null).length;
-
-        List<Double> list = new ArrayList<>(size);
-        for (double[] doubles : iterable) {
-            list.addAll(Doubles.asList(doubles));
-        }
-        return list.toArray(new Double[0]);
-    }
-
     public static void main(String[] args) throws IOException, URISyntaxException, ClassNotFoundException {
         TrainingApp app = new TrainingApp();
 
@@ -110,24 +103,20 @@ public class TrainingApp extends App {
         featureMap.put(Feature.Type.HOG, app.fusion(bowImages, new Feature.Type[]{Feature.Type.HOG}));
         featureMap.put(Feature.Type.SILTP, app.fusion(bowImages, new Feature.Type[]{Feature.Type.SILTP}));
 
-        int hsvLength = bowImages.get(0).sp4[0].features.get(Feature.Type.HSV).length;
-        int cnLength = bowImages.get(0).sp4[0].features.get(Feature.Type.CN).length;
-        int hogLength = bowImages.get(0).sp4[0].features.get(Feature.Type.HOG).length;
-        int siltpLength = bowImages.get(0).sp4[0].features.get(Feature.Type.SILTP).length;
-
         // clear bowImages to release memory
         bowImages.clear();
 
         // save feature map to mat file
         System.out.print("start translate to mat");
-
         new MatFileWriter().write(
                 "TUDpositive_feature_" + numSuperpixels + "_" + compactness + ".mat",
                 Lists.newArrayList(
-                        new MLDouble("hsv", to(featureMap.get(Feature.Type.HSV)), hsvLength),
-                        new MLDouble("cn", to(featureMap.get(Feature.Type.CN)), cnLength),
-                        new MLDouble("hog", to(featureMap.get(Feature.Type.HOG)), hogLength),
-                        new MLDouble("siltp", to(featureMap.get(Feature.Type.SILTP)), siltpLength)));
+                        MatrixUtils.to("hsv", featureMap.get(Feature.Type.HSV)),
+                        MatrixUtils.to("cn", featureMap.get(Feature.Type.CN)),
+                        MatrixUtils.to("hog", featureMap.get(Feature.Type.HOG)),
+                        MatrixUtils.to("siltp", featureMap.get(Feature.Type.SILTP))
+                )
+        );
 
         // code book training
 //        Map<Feature.Type, List<double[]>> codebookMap = app.codeBookTraining(training, featureMap);

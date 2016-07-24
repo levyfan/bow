@@ -4,7 +4,6 @@ import com.github.levyfan.reid.eval.Viper;
 import com.github.levyfan.reid.feature.Feature;
 import com.google.common.primitives.Doubles;
 import com.jmatio.io.MatFileWriter;
-import com.jmatio.types.MLDouble;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.util.Pair;
@@ -41,11 +40,13 @@ public class ViperApp extends App {
         List<double[]> histB = (List<double[]>) app.fusion(bowImagesB, types);
 
         // write to mat
-        MLDouble a = new MLDouble("HistA", histA.toArray(new double[0][]));
-        MLDouble b = new MLDouble("HistB", histB.toArray(new double[0][]));
         new MatFileWriter().write(
                 "hist_" + numSuperpixels + "_" + compactness + ".mat",
-                Arrays.asList(a, b));
+                Arrays.asList(
+                        com.github.levyfan.reid.util.MatrixUtils.to("HistA", histA),
+                        com.github.levyfan.reid.util.MatrixUtils.to("HistB", histB)
+                )
+        );
 
         // descriptor level non-pca
         double[] MR = app.viper.eval(histA, histB, false).getFirst();

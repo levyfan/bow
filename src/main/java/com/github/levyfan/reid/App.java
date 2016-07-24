@@ -6,6 +6,7 @@ import com.github.levyfan.reid.bow.StripMethod;
 import com.github.levyfan.reid.codebook.CodeBook;
 import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.feature.FeatureManager;
+import com.github.levyfan.reid.sp.PatchMethod;
 import com.github.levyfan.reid.sp.Slic;
 import com.github.levyfan.reid.sp.SuperPixelMethond;
 import com.google.common.collect.Lists;
@@ -52,6 +53,7 @@ public class App {
     private static final File codebookFile = new File("codebook_wordlevel_slic_500_20.0.dat");
 
     static final boolean wordLevel = false;
+    private static final boolean patch = false;
 
     static final PatternFilenameFilter filter =
             new PatternFilenameFilter("[^\\s]+(\\.(?i)(jpg|png|gif|bmp))$");
@@ -70,8 +72,11 @@ public class App {
             codebook = this.loadCodeBookMat(codebookFile);
         }
 
-        this.spMethod = new Slic(numSuperpixels, compactness);
-//        this.spMethod = new PatchMethod(patchSize*4);
+        if (patch) {
+            this.spMethod = new PatchMethod(patchSize*4);
+        } else {
+            this.spMethod = new Slic(numSuperpixels, compactness);
+        }
 
         this.featureManager = new FeatureManager();
         this.codeBook = new CodeBook();
@@ -138,22 +143,20 @@ public class App {
     }
 
     Iterable<double[]> fusion(List<BowImage> bowImages, Feature.Type[] types) {
-        List<double[]> hists = bowImages.stream().map(bowImage -> {
+        return bowImages.parallelStream().map(bowImage -> {
             double[][] features = new double[types.length][];
             for (int i = 0; i < types.length; i++) {
                 features[i] = bowImage.hist.get(types[i]);
             }
-            return Doubles.concat(features);
-        }).collect(Collectors.toList());
+            double[] hist = Doubles.concat(features);
 
-        hists.stream().forEach(hist -> {
+            // normalize
             double sum = Math.sqrt(new SumOfSquares().evaluate(hist));
             for (int i = 0; i < hist.length; i++) {
                 hist[i] = hist[i] / sum;
             }
-        });
-
-        return hists;
+            return hist;
+        }).collect(Collectors.toList());
     }
 
     @Override

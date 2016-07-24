@@ -2,8 +2,8 @@ package com.github.levyfan.reid;
 
 import com.github.levyfan.reid.eval.Market1501;
 import com.github.levyfan.reid.feature.Feature;
+import com.github.levyfan.reid.util.MatrixUtils;
 import com.jmatio.io.MatFileWriter;
-import com.jmatio.types.MLDouble;
 import org.apache.commons.math3.util.Pair;
 
 import java.io.File;
@@ -48,20 +48,25 @@ public class Market1501App extends App {
         List<BowImage> queryBowImages = app.generateHist(queryCamFolder, queryMaskFolder, "");
         List<BowImage> testBowImages = app.generateHist(testCamFolder, testMaskFolder, "");
 
-        List<Pair<Integer, Integer>> queryIdAndCam = app.idAndCam(queryCamFolder);
-        List<Pair<Integer, Integer>> testIdAndCam = app.idAndCam(testCamFolder);
-
+        System.out.println("hist fusion");
         List<double[]> queryHist = (List<double[]>) app.fusion(queryBowImages, types);
         List<double[]> testHist = (List<double[]>) app.fusion(testBowImages, types);
 
         // write to mat
-        MLDouble a = new MLDouble("Hist_query", queryHist.toArray(new double[0][]));
-        MLDouble b = new MLDouble("Hist_test", testHist.toArray(new double[0][]));
+        System.out.println("write hist to mat");
         new MatFileWriter().write(
                 "market1501_hist_" + numSuperpixels + "_" + compactness + ".mat",
-                Arrays.asList(a, b));
+                Arrays.asList(
+                        MatrixUtils.to("Hist_query", queryHist),
+                        MatrixUtils.to("Hist_test", testHist)
+                )
+        );
+
+        List<Pair<Integer, Integer>> queryIdAndCam = app.idAndCam(queryCamFolder);
+        List<Pair<Integer, Integer>> testIdAndCam = app.idAndCam(testCamFolder);
 
         // descriptor level
+        System.out.println("calculate score");
         Pair<Double, double[]> mapAndCmc = new Market1501().eval(queryHist, queryIdAndCam, testHist, testIdAndCam);
         System.out.println("map=" + mapAndCmc.getFirst() + ", precision=" + Arrays.toString(mapAndCmc.getSecond()));
 

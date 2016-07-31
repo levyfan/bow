@@ -26,6 +26,9 @@ public class Market1501App extends App {
     private static final File testCamFolder = new File("/data/reid/market1501/dataset/bounding_box_test");
     private static final File testMaskFolder = new File("/data/reid/market1501/mask/bounding_box_test");
 
+    private static final File trainCamFolder = new File("/data/reid/market1501/dataset/bounding_box_train");
+    private static final File trainMaskFolder = new File("/data/reid/market1501/mask/bounding_box_train");
+
     private Market1501App() throws IOException, URISyntaxException, ClassNotFoundException {
         super();
     }
@@ -47,42 +50,53 @@ public class Market1501App extends App {
     public static void main(String[] args) throws ClassNotFoundException, IOException, URISyntaxException {
         Market1501App app = new Market1501App();
 
-        List<BowImage> queryBowImages = app.generateHist(queryCamFolder, queryMaskFolder, "");
-        List<BowImage> testBowImages = app.generateHist(testCamFolder, testMaskFolder, "");
+//        List<BowImage> queryBowImages = app.generateHist(queryCamFolder, queryMaskFolder, "");
+//        List<BowImage> testBowImages = app.generateHist(testCamFolder, testMaskFolder, "");
+        List<BowImage> trainBowImages = app.generateHist(trainCamFolder, trainMaskFolder, "");
 
         System.out.println("hist fusion");
-        List<double[]> queryHist = (List<double[]>) app.fusion(queryBowImages, types);
-        List<double[]> testHist = (List<double[]>) app.fusion(testBowImages, types);
+//        List<double[]> queryHist = (List<double[]>) app.fusion(queryBowImages, types);
+//        List<double[]> testHist = (List<double[]>) app.fusion(testBowImages, types);
+        List<double[]> trainHist = (List<double[]>) app.fusion(trainBowImages, types);
 
         // write to mat/csv
-        System.out.println("write query hist to mat");
-        new MatFileWriter().write(
-                "market1501_hist_query_" + numSuperpixels + "_" + compactness + ".mat",
-                Collections.singleton(MatrixUtils.to("Hist_query", queryHist))
-        );
-        System.out.println("write test hist to cvs");
+//        System.out.println("write query hist to mat");
+//        new MatFileWriter().write(
+//                "market1501_hist_query_" + numSuperpixels + "_" + compactness + "_" + pstep + ".mat",
+//                Collections.singleton(MatrixUtils.to("Hist_query", queryHist))
+//        );
+//        System.out.println("write test hist to cvs");
+//        try (FileOutputStream os = new FileOutputStream(
+//                "market1501_hist_test_" + numSuperpixels + "_" + compactness + "_" + pstep + ".csv");
+//             PrintWriter writer = new PrintWriter(os, true)) {
+//            for (double[] hist : testHist) {
+//                writer.println(Joiner.on(',').join(Doubles.asList(hist)));
+//            }
+//        }
+        System.out.println("write train hist to mat");
         try (FileOutputStream os = new FileOutputStream(
-                "market1501_hist_test_" + numSuperpixels + "_" + compactness + ".csv");
+                "market1501_hist_train_" + numSuperpixels + "_" + compactness + "_" + pstep + ".csv");
              PrintWriter writer = new PrintWriter(os, true)) {
-            for (double[] hist : testHist) {
+            for (double[] hist : trainHist) {
                 writer.println(Joiner.on(',').join(Doubles.asList(hist)));
             }
         }
 
-        List<Pair<Integer, Integer>> queryIdAndCam = app.idAndCam(queryCamFolder);
-        List<Pair<Integer, Integer>> testIdAndCam = app.idAndCam(testCamFolder);
 
-        // descriptor level
-        System.out.println("calculate score");
-        Pair<Double, double[]> mapAndCmc = new Market1501().eval(queryHist, queryIdAndCam, testHist, testIdAndCam);
-        System.out.println("map=" + mapAndCmc.getFirst() + ", precision=" + Arrays.toString(mapAndCmc.getSecond()));
-
-        // seperate
-        for (Feature.Type type : types) {
-            queryHist = (List<double[]>) app.fusion(queryBowImages, new Feature.Type[]{type});
-            testHist = (List<double[]>) app.fusion(testBowImages, new Feature.Type[]{type});
-            mapAndCmc = new Market1501().eval(queryHist, queryIdAndCam, testHist, testIdAndCam);
-            System.out.println("map=" + mapAndCmc.getFirst() + ", precision=" + Arrays.toString(mapAndCmc.getSecond()));
-        }
+//        List<Pair<Integer, Integer>> queryIdAndCam = app.idAndCam(queryCamFolder);
+//        List<Pair<Integer, Integer>> testIdAndCam = app.idAndCam(testCamFolder);
+//
+//        // descriptor level
+//        System.out.println("calculate score");
+//        Pair<Double, double[]> mapAndCmc = new Market1501().eval(queryHist, queryIdAndCam, testHist, testIdAndCam);
+//        System.out.println("map=" + mapAndCmc.getFirst() + ", precision=" + Arrays.toString(mapAndCmc.getSecond()));
+//
+//        // seperate
+//        for (Feature.Type type : types) {
+//            queryHist = (List<double[]>) app.fusion(queryBowImages, new Feature.Type[]{type});
+//            testHist = (List<double[]>) app.fusion(testBowImages, new Feature.Type[]{type});
+//            mapAndCmc = new Market1501().eval(queryHist, queryIdAndCam, testHist, testIdAndCam);
+//            System.out.println("map=" + mapAndCmc.getFirst() + ", precision=" + Arrays.toString(mapAndCmc.getSecond()));
+//        }
     }
 }

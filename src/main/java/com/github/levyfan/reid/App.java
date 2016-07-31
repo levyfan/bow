@@ -48,7 +48,7 @@ public class App {
     private static final int ystep = 8;
     private static final int stripLength = 8;
     private static final int patchSize = 4;
-    private static final int pstep = 0;
+    static final int pstep = 0;
 
     private static final File codebookFile = new File("codebook_wordlevel_slic_500_20.0.dat");
 
@@ -82,7 +82,7 @@ public class App {
         this.codeBook = new CodeBook();
         this.stripMethod = new StripMethod(ystep*4, stripLength*4, pstep*4);
         this.bowManager = new BowManager(
-                new Bow(K, sigma, codebook, new Max()),
+                new Bow(K, sigma, codebook, new Mean()),
                 this.featureManager,
                 wordLevel);
 

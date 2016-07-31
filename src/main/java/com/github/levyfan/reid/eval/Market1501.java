@@ -8,6 +8,7 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.util.Pair;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * @author fanliwen
@@ -64,7 +65,7 @@ public class Market1501 {
         double[] ap = new double[queryHist.size()];
         RealMatrix cmc = MatrixUtils.createRealMatrix(queryHist.size(), testHist.size());
 
-        for (int k = 0; k < queryHist.size(); k ++) {
+        IntStream.range(0, queryHist.size()).parallel().forEach(k -> {
             ArrayRealVector query = new ArrayRealVector(queryHist.get(k));
 
             // sort by score
@@ -99,7 +100,7 @@ public class Market1501 {
             Pair<Double, double[]> pair = compute(index, goodIndex, junkIndex);
             ap[k] = pair.getFirst();
             cmc.setRow(k, pair.getSecond());
-        }
+        });
 
         double[] cmcArray = new double[cmc.getColumnDimension()];
         for (int col = 0; col < cmc.getColumnDimension(); col ++) {

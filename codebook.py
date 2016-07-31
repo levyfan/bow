@@ -14,7 +14,7 @@ def generate_codebook(feature, codebook_size):
 
 
 if __name__ == "__main__":
-    feature = sio.loadmat('TUDpositive_feature_500_20.0.mat')
+    feature = sio.loadmat('TUDpositive_feature_500_1.0.mat')
 
     hsv = transpose(feature['hsv'])
     cn = transpose(feature['cn'])

@@ -1,25 +1,22 @@
 package com.github.levyfan.reid;
 
+import com.github.levyfan.reid.bow.Strip;
 import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.sp.SuperPixel;
 import com.github.levyfan.reid.util.MatrixUtils;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Doubles;
 import com.jmatio.io.MatFileWriter;
-import org.apache.commons.math3.util.Pair;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -28,12 +25,13 @@ import java.util.stream.Collectors;
 public class TrainingApp extends App {
 
     private static final File training = new File("/data/reid/TUDpositive");
+    private static final File mask = new File("/data/reid/TUDpositive_mask");
 
     private TrainingApp() throws IOException, URISyntaxException, ClassNotFoundException {
         super();
     }
 
-    private List<BowImage> featureTraining(File folder) throws IOException {
+    private List<BowImage> featureTraining(File folder, File maskFolder) throws IOException {
         File[] files = folder.listFiles(filter);
 
         return Lists.newArrayList(files)
@@ -43,7 +41,11 @@ public class TrainingApp extends App {
                         System.out.println(file.getName());
                         BufferedImage image = ImageIO.read(file);
 
-                        BowImage bowImage = new BowImage(spMethod, null, image, null);
+                        String maskFileName = file.getName().replace("png", "bmp");
+                        BufferedImage mask = ImageIO.read(new File(maskFolder, maskFileName));
+
+                        BowImage bowImage = new BowImage(
+                                spMethod, stripMethod, image, mask);
                         featureManager.feature(bowImage);
                         return bowImage;
                     } catch (IOException e) {
@@ -69,62 +71,63 @@ public class TrainingApp extends App {
         return Iterables.concat(list);
     }
 
-    private Map<Feature.Type, List<double[]>> codeBookTraining(
-            File folder, Map<Feature.Type, Iterable<double[]>> featureMap) throws IOException {
-        Map<Feature.Type, List<double[]>> books = featureMap.entrySet()
-                .parallelStream()
-                .map(entry -> {
-                    System.out.println("codebook gen start " + entry.getKey());
+    Map<Integer, Collection<double[]>> fusion(List<BowImage> bowImages) {
+        ListMultimap<Integer, double[]> multimap = ArrayListMultimap.create();
+        for (BowImage bowImage : bowImages) {
+            for (Strip strip : bowImage.strip4) {
+                for (int n : strip.superPixels) {
+                    SuperPixel superPixel = bowImage.sp4[n];
+                    double[] feature = Doubles.concat(
+                            superPixel.features.get(App.types[0]),
+                            superPixel.features.get(App.types[1]),
+                            superPixel.features.get(App.types[2]),
+                            superPixel.features.get(App.types[3]));
 
-                    List<double[]> words = codeBook.codebook(
-                            entry.getValue(), entry.getKey() == Feature.Type.ALL ? codeBookSize * 4 : codeBookSize);
-
-                    System.out.println("codebook gen done " + entry.getKey());
-                    return Pair.create(entry.getKey(), words);
-                }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
-
-        File dat = new File(folder, "codebook_wordlevel_fix_slic_" + numSuperpixels + "_" + compactness + ".dat");
-        try (ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(dat))) {
-            os.writeObject(books);
+                    multimap.put(strip.index, feature);
+                }
+            }
         }
-        return books;
+        return multimap.asMap();
     }
 
     public static void main(String[] args) throws IOException, URISyntaxException, ClassNotFoundException {
         TrainingApp app = new TrainingApp();
 
         // extract feature
-        List<BowImage> bowImages = app.featureTraining(training);
+        List<BowImage> bowImages = app.featureTraining(training, mask);
 
         // word level fusion
-        Map<Feature.Type, Iterable<double[]>> featureMap = new EnumMap<>(Feature.Type.class);
-        featureMap.put(Feature.Type.HSV, app.fusion(bowImages, new Feature.Type[]{Feature.Type.HSV}));
-        featureMap.put(Feature.Type.CN, app.fusion(bowImages, new Feature.Type[]{Feature.Type.CN}));
-        featureMap.put(Feature.Type.HOG, app.fusion(bowImages, new Feature.Type[]{Feature.Type.HOG}));
-        featureMap.put(Feature.Type.SILTP, app.fusion(bowImages, new Feature.Type[]{Feature.Type.SILTP}));
+//        Map<Feature.Type, Iterable<double[]>> featureMap = new EnumMap<>(Feature.Type.class);
+//        featureMap.put(Feature.Type.HSV, app.fusion(bowImages, new Feature.Type[]{Feature.Type.HSV}));
+//        featureMap.put(Feature.Type.CN, app.fusion(bowImages, new Feature.Type[]{Feature.Type.CN}));
+//        featureMap.put(Feature.Type.HOG, app.fusion(bowImages, new Feature.Type[]{Feature.Type.HOG}));
+//        featureMap.put(Feature.Type.SILTP, app.fusion(bowImages, new Feature.Type[]{Feature.Type.SILTP}));
+
+        Map<Integer, Collection<double[]>> featureMap = app.fusion(bowImages);
 
         // clear bowImages to release memory
         bowImages.clear();
 
         // save feature map to mat file
         System.out.print("start translate to mat");
+//        new MatFileWriter().write(
+//                "TUDpositive_feature_" + numSuperpixels + "_" + compactness + ".mat",
+//                Lists.newArrayList(
+//                        MatrixUtils.to("hsv", featureMap.get(Feature.Type.HSV)),
+//                        MatrixUtils.to("cn", featureMap.get(Feature.Type.CN)),
+//                        MatrixUtils.to("hog", featureMap.get(Feature.Type.HOG)),
+//                        MatrixUtils.to("siltp", featureMap.get(Feature.Type.SILTP))
+//                )
+//        );
         new MatFileWriter().write(
-                "TUDpositive_feature_" + numSuperpixels + "_" + compactness + ".mat",
+                "TUDpositive_parse_" + numSuperpixels + "_" + compactness + ".mat",
                 Lists.newArrayList(
-                        MatrixUtils.to("hsv", featureMap.get(Feature.Type.HSV)),
-                        MatrixUtils.to("cn", featureMap.get(Feature.Type.CN)),
-                        MatrixUtils.to("hog", featureMap.get(Feature.Type.HOG)),
-                        MatrixUtils.to("siltp", featureMap.get(Feature.Type.SILTP))
+                        MatrixUtils.to("p0", featureMap.get(0)),
+                        MatrixUtils.to("p1", featureMap.get(1)),
+                        MatrixUtils.to("p2", featureMap.get(2)),
+                        MatrixUtils.to("p3", featureMap.get(3)),
+                        MatrixUtils.to("p4", featureMap.get(4))
                 )
         );
-
-        // code book training
-//        Map<Feature.Type, List<double[]>> codebookMap = app.codeBookTraining(training, featureMap);
-//        new MatFileWriter().write(
-//                "codebook_wordlevel_fix_" + numSuperpixels + "_" + compactness + ".mat",
-//                codebookMap.entrySet()
-//                        .stream()
-//                        .map(entry -> new MLDouble(entry.getKey().name(), entry.getValue().toArray(new double[0][])))
-//                        .collect(Collectors.toList()));
     }
 }

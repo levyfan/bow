@@ -7,7 +7,7 @@ import com.github.levyfan.reid.codebook.CodeBook;
 import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.feature.FeatureManager;
 import com.github.levyfan.reid.sp.PatchMethod;
-import com.github.levyfan.reid.sp.Slic;
+import com.github.levyfan.reid.sp.SlicMethod;
 import com.github.levyfan.reid.sp.SuperPixelMethond;
 import com.google.common.collect.Lists;
 import com.google.common.io.PatternFilenameFilter;
@@ -15,7 +15,6 @@ import com.google.common.primitives.Doubles;
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLNumericArray;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
-import org.apache.commons.math3.stat.descriptive.rank.Max;
 import org.apache.commons.math3.stat.descriptive.summary.SumOfSquares;
 
 import javax.imageio.ImageIO;
@@ -61,8 +60,8 @@ public class App {
     SuperPixelMethond spMethod;
     FeatureManager featureManager;
     CodeBook codeBook;
-    private StripMethod stripMethod;
-    private BowManager bowManager;
+    StripMethod stripMethod;
+    BowManager bowManager;
 
     App() throws IOException, URISyntaxException, ClassNotFoundException {
         Map<Feature.Type, List<double[]>> codebook;
@@ -75,12 +74,13 @@ public class App {
         if (patch) {
             this.spMethod = new PatchMethod(patchSize*4);
         } else {
-            this.spMethod = new Slic(numSuperpixels, compactness);
+            this.spMethod = new SlicMethod(numSuperpixels, compactness);
         }
 
         this.featureManager = new FeatureManager();
         this.codeBook = new CodeBook();
         this.stripMethod = new StripMethod(ystep*4, stripLength*4, pstep*4);
+//        this.stripMethod = new ParsingMethod(ystep*4, stripLength*4, pstep*4);
         this.bowManager = new BowManager(
                 new Bow(K, sigma, codebook, new Mean()),
                 this.featureManager,

@@ -1,17 +1,17 @@
 clear all; clc; close all;
 %% PCA
-Hist_train = importdata('market1501_hist_test_500_20.0.mat');
-[ ~,u,m ] = mypca(Hist_train);
-clear Hist_train;
+% Hist_train = importdata('market1501_hist_test_500_20.0.mat');
+% [ ~,u,m ] = mypca(Hist_train);
+% clear Hist_train;
 
 %% search the database and calcuate re-id accuracy
-Hist_query = importdata('market1501_hist_query_500_20.0.mat');
-Hist_test = importdata('market1501_hist_test_500_20.0.mat');
+Hist_query = importdata('market1501_hist_query_500_20_0_512.mat');
+Hist_test = importdata('market1501_hist_test_500_20_0_512.mat');
 nQuery = size(Hist_query, 2);
 nTest = size(Hist_test, 2);
 
-Hist_query = u'*(Hist_query - m*ones(1,nQuery));
-Hist_test = u'*(Hist_test - m*ones(1,nTest));
+% Hist_query = u'*(Hist_query - m*ones(1,nQuery));
+% Hist_test = u'*(Hist_test - m*ones(1,nTest));
 
 ap = zeros(nQuery, 1); % average precision
 CMC = zeros(nQuery, nTest);

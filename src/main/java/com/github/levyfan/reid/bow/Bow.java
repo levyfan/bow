@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author fanliwen
@@ -48,8 +50,18 @@ public class Bow {
         this.pooling = pooling;
     }
 
-    void bow(BowImage bowImage, Feature.Type type) {
+    public Map<Feature.Type, List<double[]>> getCodebooks() {
+        return codebooks;
+    }
+
+    void bow(BowImage bowImage, Feature.Type type, int randomProjectionTreeIndex) {
         List<double[]> codebook = codebooks.get(type);
+//         if (type == Feature.Type.ALL) {
+//            codebook = IntStream.range(0, codebook.size())
+//                    .filter(index -> index % 4 == randomProjectionTreeIndex)
+//                    .mapToObj(codebook::get)
+//                    .collect(Collectors.toList());
+//         }
 
         int[] tf = new int[codebook.size()];
         List<int[]> words = new ArrayList<>(bowImage.sp4.length);

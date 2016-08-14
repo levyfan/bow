@@ -8,6 +8,8 @@ import com.google.common.primitives.Ints;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 
 import java.awt.image.BufferedImage;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author fanliwen
@@ -34,13 +36,18 @@ public class StripMethod {
             int[] rows = sp[n].rows;
             int[] cols = sp[n].cols;
 
-            int sum = 0;
+            Set<Integer> labelsOfSuperpixel = new HashSet<>();
             for (int k = 0; k < rows.length; k++) {
-                sum += (mask.getRGB(cols[k], rows[k]) & 0x00ffffff);
-            }
-            if (sum == 0) {
-                // background
-                continue;
+                int value = mask.getRGB(cols[k], rows[k]) & 0x000000ff;
+                switch (value) {
+                    case 0: break;
+                    case 56: labelsOfSuperpixel.add(0); break;
+                    case 79: labelsOfSuperpixel.add(0); break;
+                    case 96: labelsOfSuperpixel.add(0); break;
+                    case 110: labelsOfSuperpixel.add(0); break;
+                    case 136: labelsOfSuperpixel.add(0); break;
+                    default: labelsOfSuperpixel.add(0); break;
+                }
             }
 
             double cRow = new Mean().evaluate(Doubles.toArray(Ints.asList(rows)));
@@ -49,7 +56,9 @@ public class StripMethod {
             // (row-length)/ystep < nstrip <= row/ystep
             int start = (int) Math.max(Math.floor((cRow-length+ystep)/ystep), 0);
             for (int nstrip = start; nstrip <= (int) Math.floor(cRow/ystep); nstrip++) {
-                labels.put(nstrip, n);
+                for (int labelOfSuperpixel : labelsOfSuperpixel) {
+                    labels.put(nstrip + labelOfSuperpixel, n);
+                }
             }
 
             // pooling low
@@ -57,7 +66,9 @@ public class StripMethod {
             // (row - length + pstep)/ystep < nstrip <= (row + pstep)/ystep
             start = (int) Math.max(Math.floor((cRow-length+pstep+ystep)/ystep), 0);
             for (int nstrip = start; nstrip <= (int) Math.floor((cRow+pstep)/ystep); nstrip++) {
-                lowLabels.put(nstrip, n);
+                for (int labelOfSuperpixel : labelsOfSuperpixel) {
+                    lowLabels.put(nstrip + labelOfSuperpixel, n);
+                }
             }
 
             // pooling high
@@ -65,7 +76,9 @@ public class StripMethod {
             // (row - length - pstep)/ystep < nstrip <= (row - pstep)/ystep
             start = (int) Math.max(Math.floor((cRow-length-pstep+ystep)/ystep), 0);
             for (int nstrip = start; nstrip <= (int) Math.floor((cRow-pstep)/ystep); nstrip++) {
-                highLabels.put(nstrip, n);
+                for (int labelOfSuperpixel : labelsOfSuperpixel) {
+                    highLabels.put(nstrip + labelOfSuperpixel, n);
+                }
             }
         }
 

@@ -15,7 +15,7 @@ public class SlicTest {
     @Test
     public void test() throws IOException {
         BufferedImage image = ImageIO.read(this.getClass().getResource("/bee.jpg"));
-        SuperPixel[] sp = new Slic(500, 10).slic(image);
+        SuperPixel[] sp = new SlicMethod(500, 10).slic(image);
 
         Assert.assertEquals(488L, sp.length);
     }

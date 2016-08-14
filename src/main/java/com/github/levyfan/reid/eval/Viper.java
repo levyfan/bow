@@ -87,6 +87,11 @@ public class Viper {
             List<double[]> hist = Lists.newArrayList(Iterables.concat(histA, histB));
             BlasPca pca = new BlasPca(hist);
 
+//            DoubleMatrix u = pca.u;
+//            DoubleMatrix histPcaA = u.transpose().mmul(
+//                    new DoubleMatrix(histA.toArray(new double[0][])).transpose());
+//            DoubleMatrix histPcaB = u.transpose().mmul(
+//                    new DoubleMatrix(histB.toArray(new double[0][])).transpose());
             DoubleMatrix histPcaA = pca.ux.get(
                     new IntervalRange(0, pca.ux.getRows()), new IntervalRange(0, histA.size()));
             DoubleMatrix histPcaB = pca.ux.get(

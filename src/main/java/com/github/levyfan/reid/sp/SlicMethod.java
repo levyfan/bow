@@ -13,7 +13,7 @@ import java.util.Arrays;
 /**
  * @author fanliwen
  */
-public class Slic implements SuperPixelMethond {
+public class SlicMethod implements SuperPixelMethond {
 
     private static final double Xr = 0.950456;    //reference white
     private static final double Yr = 1.0;        //reference white
@@ -25,7 +25,7 @@ public class Slic implements SuperPixelMethond {
     private int numSuperpixels;
     private double compactness;
 
-    public Slic(int numSuperpixels, double compactness) {
+    public SlicMethod(int numSuperpixels, double compactness) {
         this.numSuperpixels = numSuperpixels;
         this.compactness = compactness;
     }
@@ -345,7 +345,7 @@ public class Slic implements SuperPixelMethond {
 
     @Override
     public String toString() {
-        return "Slic{" +
+        return "SlicMethod{" +
                 "numSuperpixels=" + numSuperpixels +
                 ", compactness=" + compactness +
                 '}';

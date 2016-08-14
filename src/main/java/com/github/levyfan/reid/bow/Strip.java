@@ -13,5 +13,8 @@ public class Strip {
     public Strip(int index, int[] superPixels) {
         this.index = index;
         this.superPixels = superPixels;
+
+        this.lowSuperPixels = superPixels;
+        this.highSuperPixels = superPixels;
     }
 }

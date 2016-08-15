@@ -5,6 +5,7 @@ import com.github.levyfan.reid.sp.SuperPixel;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.jmatio.io.MatFileReader;
+import com.jmatio.io.MatFileType;
 import com.jmatio.types.MLDouble;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -12,8 +13,8 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 
 /**
@@ -24,14 +25,15 @@ class Cn implements Feature {
     private RealMatrix w2c;
 
     Cn() throws IOException, URISyntaxException {
-        File file = new File(this.getClass().getResource("/w2c.mat").toURI());
-        MatFileReader reader = new MatFileReader(file);
-        MLDouble array = (MLDouble) reader.getMLArray("w2c");
+        try (InputStream in = this.getClass().getResourceAsStream("/w2c.mat")) {
+            MatFileReader reader = new MatFileReader(in, MatFileType.Regular);
+            MLDouble array = (MLDouble) reader.getMLArray("w2c");
 
-        w2c = MatrixUtils.createRealMatrix(array.getM(), array.getN());
-        for (int i = 0; i < w2c.getRowDimension(); i++) {
-            for (int j = 0; j < w2c.getColumnDimension(); j++) {
-                w2c.setEntry(i, j, array.getReal(i, j));
+            w2c = MatrixUtils.createRealMatrix(array.getM(), array.getN());
+            for (int i = 0; i < w2c.getRowDimension(); i++) {
+                for (int j = 0; j < w2c.getColumnDimension(); j++) {
+                    w2c.setEntry(i, j, array.getReal(i, j));
+                }
             }
         }
     }

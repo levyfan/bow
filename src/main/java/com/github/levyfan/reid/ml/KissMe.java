@@ -11,6 +11,9 @@ import org.apache.commons.math3.util.Pair;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author fanliwen
@@ -19,30 +22,48 @@ public class KissMe {
 
     public RealMatrix kissMe(List<BowImage> bowImages, Feature.Type type) {
         int length = bowImages.get(0).sp4[0].features.get(type).length;
+
+        List<Object[]> objects = IntStream.range(0, bowImages.size()).parallel().mapToObj(i -> {
+            RealMatrix positive = MatrixUtils.createRealMatrix(length, length);
+            RealMatrix negative = MatrixUtils.createRealMatrix(length, length);
+
+            BowImage x = bowImages.get(i);
+            System.out.println("kissme: " + x.id);
+
+            // positive
+            long countPositive = IntStream.range(i + 1, bowImages.size()).mapToLong(j -> {
+                if (Objects.equals(x.id, bowImages.get(j).id)) {
+                    Pair<RealMatrix, Long> pair = km(x, bowImages.get(j), type);
+                    com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(positive, pair.getFirst());
+                    return pair.getSecond();
+                } else {
+                    return 0;
+                }
+            }).sum();
+
+            // negative
+            long countNegative = ThreadLocalRandom.current().ints(100, 0, bowImages.size()).mapToLong(j -> {
+                if (!Objects.equals(x.id, bowImages.get(j).id)) {
+                    Pair<RealMatrix, Long> pair = km(x, bowImages.get(j), type);
+                    com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(negative, pair.getFirst());
+                    return pair.getSecond();
+                } else {
+                    return 0;
+                }
+            }).sum();
+
+            return new Object[] {positive, negative, countPositive, countNegative};
+        }).collect(Collectors.toList());
+
         RealMatrix positive = MatrixUtils.createRealMatrix(length, length);
         RealMatrix negative = MatrixUtils.createRealMatrix(length, length);
-
         long countPositive = 0;
         long countNegative = 0;
-
-        for (int i = 0; i < bowImages.size(); i++) {
-            for (int j = i + 1; j < bowImages.size(); j++) {
-                BowImage x = bowImages.get(i);
-                BowImage y = bowImages.get(j);
-                System.out.println("kissme: " + x.id);
-
-                Pair<RealMatrix, Long> pair = km(x, y, type);
-
-                if (Objects.equals(x.id, y.id)) {
-                    // positive
-                    positive = positive.add(pair.getFirst());
-                    countPositive += pair.getSecond();
-                } else {
-                    // negative
-                    negative = negative.add(pair.getFirst());
-                    countNegative += pair.getSecond();
-                }
-            }
+        for (Object[] obj : objects) {
+            com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(positive, (RealMatrix) obj[0]);
+            countPositive += (long) obj[2];
+            com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(negative, (RealMatrix) obj[1]);
+            countNegative += (long) obj[3];
         }
 
         positive = positive.scalarMultiply(1.0/(double) countPositive);
@@ -65,10 +86,9 @@ public class KissMe {
                 for (int jSuperPixel : jStrip.superPixels) {
                     ArrayRealVector iFeature = new ArrayRealVector(i.sp4[iSuperPixel].features.get(type), false);
                     ArrayRealVector jFeature = new ArrayRealVector(j.sp4[jSuperPixel].features.get(type), false);
-
                     ArrayRealVector delta = iFeature.subtract(jFeature);
-                    matrix = matrix.add(delta.outerProduct(delta));
 
+                    com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(matrix, delta.outerProduct(delta));
                     count++;
                 }
             }

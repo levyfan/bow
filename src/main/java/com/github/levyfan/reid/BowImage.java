@@ -28,6 +28,8 @@ public class BowImage {
 
     public Strip[] strip4;
 
+    public String id;
+
     public Map<Feature.Type, double[]> hist = new EnumMap<>(Feature.Type.class);
 
 //    public Map<Feature.Type, double[]> features = new EnumMap<>(Feature.Type.class);

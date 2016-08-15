@@ -74,8 +74,14 @@ public class TrainingApp extends App {
     Map<Integer, Collection<double[]>> fusion(List<BowImage> bowImages) {
         ListMultimap<Integer, double[]> multimap = ArrayListMultimap.create();
         for (BowImage bowImage : bowImages) {
+            Set<Integer> nSuperPixels = new HashSet<>();
             for (Strip strip : bowImage.strip4) {
                 for (int n : strip.superPixels) {
+                    if (nSuperPixels.contains(n)) {
+                        break;
+                    }
+                    nSuperPixels.add(n);
+
                     SuperPixel superPixel = bowImage.sp4[n];
                     double[] feature = Doubles.concat(
                             superPixel.features.get(App.types[0]),

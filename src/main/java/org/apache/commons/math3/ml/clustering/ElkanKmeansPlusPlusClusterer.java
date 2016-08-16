@@ -151,40 +151,6 @@ public class ElkanKmeansPlusPlusClusterer<T extends Clusterable> extends Cluster
                 return _changes;
             }).sum();
 
-//            for (int x_i = 0; x_i < N; x_i++) {
-//                boolean r = true;
-//
-//                // Steps II.
-//                if (u[x_i] <= s[partitions[x_i]]) {
-//                    continue;
-//                }
-//
-//                for (int c = 0; c < k; c++) {
-//                    // Check condition III of an algorithm.
-//                    if (isSkipNext(partitions, u, l, d_cc, x_i, c)) {
-//                        continue;
-//                    }
-//
-//                    double[] x = pointsList.get(x_i).getPoint();
-//
-//                    // III(a)
-//                    if (r) {
-//                        u[x_i] = distance(x, centers[partitions[x_i]]);
-//                        l[x_i][partitions[x_i]] = u[x_i];
-//                        r = false;
-//                    }
-//                    // III(b)
-//                    if (u[x_i] > l[x_i][c] || u[x_i] > d_cc[partitions[x_i]][c]) {
-//                        l[x_i][c] = distance(x, centers[c]);
-//                        if (l[x_i][c] < u[x_i]) {
-//                            partitions[x_i] = c;
-//                            u[x_i] = l[x_i][c];
-//                            changes++;
-//                        }
-//                    }
-//                }
-//            }
-
             // No reassignments? We can stop!
             // it != 0, needed since first iteration needed to update bounds
             // however it's possible that points won't move until centers are
@@ -201,10 +167,10 @@ public class ElkanKmeansPlusPlusClusterer<T extends Clusterable> extends Cluster
                 means[partitions[i]].increment(pointsList.get(i).getPoint());
             }
 
-            for (int i = 0; i < k; i++) {
+            IntStream.range(0, k).parallel().forEach(i -> {
                 deltas[i] = distance(centers[i], means[i].getResult());
                 centers[i] = means[i].getResult();
-            }
+            });
 
             updateBounds(partitions, u, l, deltas);
         }

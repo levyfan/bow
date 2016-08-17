@@ -114,7 +114,7 @@ public class Market1501TrainingApp extends App {
 //                    new MahalanobisDistance(M),
 //                    codeBookSize,
 //                    100);
-            KMeansPlusPlusClusterer<DoublePoint> clusterer = new ParallelKMeansPlusPlusClusterer<>(
+            ParallelKMeansPlusPlusClusterer<DoublePoint> clusterer = new ParallelKMeansPlusPlusClusterer<>(
                     codeBookSize,
                     100,
                     new MahalanobisDistance(M),

@@ -65,7 +65,7 @@ public class KMeansPlusPlusClusterer<T extends Clusterable> extends Clusterer<T>
     final int maxIterations;
 
     /** Random generator for choosing initial centers. */
-    private final RandomGenerator random;
+    final RandomGenerator random;
 
     /** Selected strategy for empty clusters. */
     final EmptyClusterStrategy emptyStrategy;

@@ -14,6 +14,7 @@ import com.jmatio.types.MLDouble;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.ml.clustering.DoublePoint;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
+import org.apache.commons.math3.ml.clustering.ParallelKMeansPlusPlusClusterer;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 
 import javax.imageio.ImageIO;
@@ -21,7 +22,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -105,24 +109,12 @@ public class Market1501TrainingApp extends App {
             // clear bowImages to release memory
             bowImages.clear();
 
-            // save feature map to mat file
-//        System.out.print("start translate to mat");
-//        new MatFileWriter().write(
-//                "Market_cbf_" + numSuperpixels + "_" + compactness + ".mat",
-//                Lists.newArrayList(
-//                        MatrixUtils.to("hsv", featureMap.get(Feature.Type.HSV)),
-//                        MatrixUtils.to("cn", featureMap.get(Feature.Type.CN)),
-//                        MatrixUtils.to("hog", featureMap.get(Feature.Type.HOG)),
-//                        MatrixUtils.to("siltp", featureMap.get(Feature.Type.SILTP)),
-//                        new MLDouble("hsvM", Mmap.get(Feature.Type.HSV).getData()),
-//                        new MLDouble("cnM", Mmap.get(Feature.Type.CN).getData()),
-//                        new MLDouble("hogM", Mmap.get(Feature.Type.HOG).getData()),
-//                        new MLDouble("siltpM", Mmap.get(Feature.Type.SILTP).getData())
-//                )
-//        );
-
             // kmeans
-            KMeansPlusPlusClusterer<DoublePoint> clusterer = new KMeansPlusPlusClusterer<>(
+//            ElkanKmeansPlusPlusClusterer<DoublePoint> clusterer = new ElkanKmeansPlusPlusClusterer<>(
+//                    new MahalanobisDistance(M),
+//                    codeBookSize,
+//                    100);
+            KMeansPlusPlusClusterer<DoublePoint> clusterer = new ParallelKMeansPlusPlusClusterer<>(
                     codeBookSize,
                     100,
                     new MahalanobisDistance(M),

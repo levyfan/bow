@@ -31,18 +31,19 @@ public class KissMe {
             System.out.println("kissme: " + x.id);
 
             // positive
-            long countPositive = IntStream.range(i + 1, bowImages.size()).mapToLong(j -> {
+            long countPositive = 0;
+            for (int j = i + 1; j < bowImages.size(); j++) {
                 if (Objects.equals(x.id, bowImages.get(j).id)) {
                     Pair<RealMatrix, Long> pair = km(x, bowImages.get(j), type);
                     com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(positive, pair.getFirst());
-                    return pair.getSecond();
+                    countPositive += pair.getSecond();
                 } else {
-                    return 0;
+                    break;
                 }
-            }).sum();
+            }
 
             // negative
-            long countNegative = ThreadLocalRandom.current().ints(100, 0, bowImages.size()).mapToLong(j -> {
+            long countNegative = ThreadLocalRandom.current().ints(5, 0, bowImages.size()).mapToLong(j -> {
                 if (!Objects.equals(x.id, bowImages.get(j).id)) {
                     Pair<RealMatrix, Long> pair = km(x, bowImages.get(j), type);
                     com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(negative, pair.getFirst());

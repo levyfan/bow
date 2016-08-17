@@ -102,6 +102,14 @@
                                         <exclude>build.properties</exclude>
                                     </excludes>
                                 </filter>
+                                <filter>
+                                    <artifact>org.apache.commons:commons-math3</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/commons/math3/ml/clustering/KMeansPlusPlusClusterer.class</exclude>
+                                        <exclude>org/apache/commons/math3/ml/clustering/KMeansPlusPlusClusterer$1.class</exclude>
+                                        <exclude>org/apache/commons/math3/ml/clustering/KMeansPlusPlusClusterer$EmptyClusterStrategy.class</exclude>
+                                    </excludes>
+                                </filter>
                             </filters>
                         </configuration>
                     </execution>

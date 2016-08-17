@@ -532,7 +532,7 @@ public class KMeansPlusPlusClusterer<T extends Clusterable> extends Clusterer<T>
      * @param point the point to find the nearest {@link Cluster} for
      * @return the index of the nearest {@link Cluster} to the given point
      */
-    private int getNearestCluster(final Collection<CentroidCluster<T>> clusters, final T point) {
+    int getNearestCluster(final Collection<CentroidCluster<T>> clusters, final T point) {
         double minDistance = Double.MAX_VALUE;
         int clusterIndex = 0;
         int minCluster = 0;

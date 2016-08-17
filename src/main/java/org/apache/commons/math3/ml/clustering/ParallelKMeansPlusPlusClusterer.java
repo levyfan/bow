@@ -25,6 +25,7 @@ import org.apache.commons.math3.ml.distance.EuclideanDistance;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.MathUtils;
+import org.apache.commons.math3.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -303,5 +304,24 @@ public class ParallelKMeansPlusPlusClusterer<T extends Clusterable> extends KMea
         }
 
         return resultSet;
+    }
+
+    /**
+     * Returns the nearest {@link Cluster} to the given point
+     *
+     * @param clusters the {@link Cluster}s to search
+     * @param point the point to find the nearest {@link Cluster} for
+     * @return the index of the nearest {@link Cluster} to the given point
+     */
+    @Override
+    int getNearestCluster(final Collection<CentroidCluster<T>> clusters, final T point) {
+        if (clusters.isEmpty()) {
+            return 0;
+        }
+
+        return IntStream.range(0, clusters.size()).parallel().mapToObj(i -> {
+            final double distance = distance(point, ((List<CentroidCluster<T>>) clusters).get(i).getCenter());
+            return Pair.create(distance, i);
+        }).min((o1, o2) -> Double.compare(o1.getFirst(), o2.getFirst())).get().getSecond();
     }
 }

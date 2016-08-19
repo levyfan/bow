@@ -38,7 +38,7 @@ public class KissMe {
                     com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(positive, pair.getFirst());
                     countPositive += pair.getSecond();
                 } else {
-                    break;
+//                    break;
                 }
             }
 

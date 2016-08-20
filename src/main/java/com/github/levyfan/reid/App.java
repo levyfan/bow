@@ -115,34 +115,44 @@ public class App {
     }
 
     private Map<Feature.Type, List<double[]>> loadCodeBookMat(File mat) throws URISyntaxException, IOException {
-        MatFileReader reader = new MatFileReader(mat);
+        try {
+            MatFileReader reader = new MatFileReader(mat);
 
-        Map<Feature.Type, List<double[]>> codebooks = new EnumMap<>(Feature.Type.class);
-        for (Feature.Type type : types) {
-            MLNumericArray ml = (MLNumericArray) reader.getMLArray("codebook_" + type);
+            Map<Feature.Type, List<double[]>> codebooks = new EnumMap<>(Feature.Type.class);
+            for (Feature.Type type : types) {
+                MLNumericArray ml = (MLNumericArray) reader.getMLArray("codebook_" + type);
 
-            List<double[]> codebook = new ArrayList<>();
-            for (int i = 0; i < ml.getM(); i++) {
-                double[] word = new double[ml.getN()];
-                for (int j = 0; j < ml.getN(); j++) {
-                    word[j] = ml.get(i, j).doubleValue();
+                List<double[]> codebook = new ArrayList<>();
+                for (int i = 0; i < ml.getM(); i++) {
+                    double[] word = new double[ml.getN()];
+                    for (int j = 0; j < ml.getN(); j++) {
+                        word[j] = ml.get(i, j).doubleValue();
+                    }
+                    codebook.add(word);
                 }
-                codebook.add(word);
+                codebooks.put(type, codebook);
             }
-            codebooks.put(type, codebook);
+            return codebooks;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-        return codebooks;
     }
 
     private Map<Feature.Type, RealMatrix> loadKissmeMat(File mat) throws IOException {
-        MatFileReader reader = new MatFileReader(mat);
+        try {
+            MatFileReader reader = new MatFileReader(mat);
 
-        Map<Feature.Type, RealMatrix> mMatrixMap = new EnumMap<>(Feature.Type.class);
-        for (Feature.Type type : types) {
-            MLNumericArray ml = (MLNumericArray) reader.getMLArray("M_" + type);
-            mMatrixMap.put(type, MatrixUtils.from(ml));
+            Map<Feature.Type, RealMatrix> mMatrixMap = new EnumMap<>(Feature.Type.class);
+            for (Feature.Type type : types) {
+                MLNumericArray ml = (MLNumericArray) reader.getMLArray("M_" + type);
+                mMatrixMap.put(type, MatrixUtils.from(ml));
+            }
+            return mMatrixMap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyMap();
         }
-        return mMatrixMap;
     }
 
     List<BowImage> generateHist(File camFolder, File maskFoler, String maskPrefix) throws IOException, ClassNotFoundException {

@@ -2,12 +2,16 @@ package com.github.levyfan.reid.codebook;
 
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Floats;
+import org.apache.commons.math3.ml.clustering.DoublePoint;
+import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.opencv_core;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * @author fanliwen
@@ -50,5 +54,18 @@ public class CodeBook {
             doubles.add(Doubles.toArray(Floats.asList(floatArray)));
         }
         return doubles;
+    }
+
+    public List<double[]> codebook(
+            KMeansPlusPlusClusterer<DoublePoint> clusterer,
+            Iterable<double[]> feature) {
+        List<DoublePoint> points = StreamSupport.stream(feature.spliterator(), false)
+                .map(DoublePoint::new)
+                .collect(Collectors.toList());
+
+        return clusterer.cluster(points)
+                .stream()
+                .map(centroidCluster -> centroidCluster.getCenter().getPoint())
+                .collect(Collectors.toList());
     }
 }

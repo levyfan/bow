@@ -6,14 +6,19 @@ import com.github.levyfan.reid.bow.StripMethod;
 import com.github.levyfan.reid.codebook.CodeBook;
 import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.feature.FeatureManager;
+import com.github.levyfan.reid.ml.MahalanobisDistance;
 import com.github.levyfan.reid.sp.PatchMethod;
 import com.github.levyfan.reid.sp.SlicMethod;
 import com.github.levyfan.reid.sp.SuperPixelMethond;
+import com.github.levyfan.reid.util.MatrixUtils;
 import com.google.common.collect.Lists;
 import com.google.common.io.PatternFilenameFilter;
 import com.google.common.primitives.Doubles;
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLNumericArray;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.ml.distance.DistanceMeasure;
+import org.apache.commons.math3.ml.distance.EuclideanDistance;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.summary.SumOfSquares;
 
@@ -24,10 +29,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -49,7 +51,7 @@ public class App {
     private static final int patchSize = 4;
     static final int pstep = 0;
 
-    private static final File codebookFile = new File("codebook_wordlevel_slic_500_20.0.dat");
+    private static final File codebookFile = new File("codebook_kissme_500_20.mat");
 
     static final boolean wordLevel = false;
     private static final boolean patch = false;
@@ -65,10 +67,22 @@ public class App {
 
     App() throws IOException, URISyntaxException, ClassNotFoundException {
         Map<Feature.Type, List<double[]>> codebook;
+        Map<Feature.Type, DistanceMeasure> distanceMeasures = new EnumMap<>(Feature.Type.class);
         if (codebookFile.getName().endsWith("dat")) {
             codebook = this.loadCodeBookDat(codebookFile);
+            for (Feature.Type type : Feature.Type.values()) {
+                distanceMeasures.put(type, new EuclideanDistance());
+            }
         } else {
             codebook = this.loadCodeBookMat(codebookFile);
+            Map<Feature.Type, RealMatrix> mMatrixMap = this.loadKissmeMat(codebookFile);
+            for (Feature.Type type : Feature.Type.values()) {
+                if (mMatrixMap.containsKey(type)) {
+                    distanceMeasures.put(type, new MahalanobisDistance(mMatrixMap.get(type)));
+                } else {
+                    distanceMeasures.put(type, new EuclideanDistance());
+                }
+            }
         }
 
         if (patch) {
@@ -82,7 +96,7 @@ public class App {
         this.stripMethod = new StripMethod(ystep*4, stripLength*4, pstep*4);
 //        this.stripMethod = new ParsingMethod(ystep*4, stripLength*4, pstep*4);
         this.bowManager = new BowManager(
-                new Bow(K, sigma, codebook, new Mean()),
+                new Bow(K, sigma, codebook, new Mean(), distanceMeasures),
                 this.featureManager,
                 wordLevel);
 
@@ -104,7 +118,7 @@ public class App {
         MatFileReader reader = new MatFileReader(mat);
 
         Map<Feature.Type, List<double[]>> codebooks = new EnumMap<>(Feature.Type.class);
-        for (Feature.Type type : Feature.Type.values()) {
+        for (Feature.Type type : types) {
             MLNumericArray ml = (MLNumericArray) reader.getMLArray("codebook_" + type);
 
             List<double[]> codebook = new ArrayList<>();
@@ -118,6 +132,17 @@ public class App {
             codebooks.put(type, codebook);
         }
         return codebooks;
+    }
+
+    private Map<Feature.Type, RealMatrix> loadKissmeMat(File mat) throws IOException {
+        MatFileReader reader = new MatFileReader(mat);
+
+        Map<Feature.Type, RealMatrix> mMatrixMap = new EnumMap<>(Feature.Type.class);
+        for (Feature.Type type : types) {
+            MLNumericArray ml = (MLNumericArray) reader.getMLArray("M_" + type);
+            mMatrixMap.put(type, MatrixUtils.from(ml));
+        }
+        return mMatrixMap;
     }
 
     List<BowImage> generateHist(File camFolder, File maskFoler, String maskPrefix) throws IOException, ClassNotFoundException {

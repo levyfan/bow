@@ -3,6 +3,7 @@ package com.github.levyfan.reid.util;
 import com.google.common.collect.Iterables;
 import com.google.common.primitives.Doubles;
 import com.jmatio.types.MLDouble;
+import com.jmatio.types.MLNumericArray;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import java.util.ArrayList;
@@ -22,6 +23,17 @@ public class MatrixUtils {
         }
 
         return new MLDouble(name, list.toArray(new Double[0]), length);
+    }
+
+    public static RealMatrix from(MLNumericArray mlNumericArray) {
+        RealMatrix matrix = org.apache.commons.math3.linear.MatrixUtils.createRealMatrix(
+                mlNumericArray.getM(), mlNumericArray.getN());
+        for (int m = 0; m < mlNumericArray.getM(); m ++) {
+            for (int n = 0; n < mlNumericArray.getN(); n ++) {
+                matrix.setEntry(m, n, mlNumericArray.getReal(m, n).doubleValue());
+            }
+        }
+        return matrix;
     }
 
     public static void inplaceAdd(RealMatrix m, RealMatrix tmp) {

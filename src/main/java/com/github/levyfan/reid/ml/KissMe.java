@@ -70,7 +70,11 @@ public class KissMe {
         positive = positive.scalarMultiply(1.0/(double) countPositive);
         negative = negative.scalarMultiply(1.0/(double) countNegative);
 
-        return new LUDecomposition(positive.subtract(negative)).getSolver().getInverse();
+        return inv(positive).subtract(inv(negative));
+    }
+
+    private static RealMatrix inv(RealMatrix matrix) {
+        return new LUDecomposition(matrix).getSolver().getInverse();
     }
 
     private static Pair<RealMatrix, Long> km(BowImage i, BowImage j, Feature.Type type) {

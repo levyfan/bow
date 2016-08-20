@@ -24,4 +24,9 @@ public class MahalanobisDistance implements DistanceMeasure {
 
         return Math.sqrt(M.preMultiply(delta).dotProduct(delta));
     }
+
+    @Override
+    public String toString() {
+        return "MahalanobisDistance{}";
+    }
 }

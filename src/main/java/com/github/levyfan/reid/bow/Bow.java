@@ -5,26 +5,28 @@ import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.sp.SuperPixel;
 import com.google.common.collect.TreeMultimap;
 import com.google.common.primitives.Doubles;
+import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.stat.descriptive.UnivariateStatistic;
-import org.apache.commons.math3.util.MathArrays;
 import org.apache.commons.math3.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * @author fanliwen
  */
 public class Bow {
 
-    private static Pair<int[], double[]> vote(double[] feature, List<double[]> codebook, int K, double sigma) {
+    private static Pair<int[], double[]> vote(
+            double[] feature,
+            List<double[]> codebook,
+            int K, double sigma,
+            DistanceMeasure distanceMeasure) {
         TreeMultimap<Double, Integer> multimap = TreeMultimap.create();
         for (int i = 0; i < codebook.size(); i++) {
-            multimap.put(MathArrays.distance(feature, codebook.get(i)), i);
+            multimap.put(distanceMeasure.compute(feature, codebook.get(i)), i);
         }
 
         Iterator<Map.Entry<Double, Integer>> iterator = multimap.entries().iterator();
@@ -42,12 +44,17 @@ public class Bow {
     private double sigma;
     private Map<Feature.Type, List<double[]>> codebooks;
     private UnivariateStatistic pooling;
+    private Map<Feature.Type, DistanceMeasure> distanceMeasures;
 
-    public Bow(int K, double sigma, Map<Feature.Type, List<double[]>> codebooks, UnivariateStatistic pooling) {
+    public Bow(int K, double sigma,
+               Map<Feature.Type, List<double[]>> codebooks,
+               UnivariateStatistic pooling,
+               Map<Feature.Type, DistanceMeasure> distanceMeasures) {
         this.K = K;
         this.sigma = sigma;
         this.codebooks = codebooks;
         this.pooling = pooling;
+        this.distanceMeasures = distanceMeasures;
     }
 
     public Map<Feature.Type, List<double[]>> getCodebooks() {
@@ -79,7 +86,7 @@ public class Bow {
                 feature = superPixel.features.get(type);
             }
 
-            Pair<int[], double[]> pair = vote(feature, codebook, K, sigma);
+            Pair<int[], double[]> pair = vote(feature, codebook, K, sigma, distanceMeasures.get(type));
             words.add(pair.getFirst());
             wwords.add(pair.getSecond());
             for (int word : pair.getFirst()) {
@@ -145,6 +152,7 @@ public class Bow {
                 "K=" + K +
                 ", sigma=" + sigma +
                 ", pooling=" + pooling +
+                ", distanceMeasures=" + distanceMeasures +
                 '}';
     }
 }

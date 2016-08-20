@@ -76,10 +76,6 @@ public class KissMe {
 
     private static RealMatrix validateCovMatrix(RealMatrix sig) {
         try {
-            System.out.println(sig.getEntry(0, 1));
-            System.out.println(sig.getEntry(1, 0));
-            System.out.println(sig.getEntry(1, 0) - sig.getEntry(0, 1));
-
             new CholeskyDecomposition(sig,
                     CholeskyDecomposition.DEFAULT_ABSOLUTE_POSITIVITY_THRESHOLD,
                     CholeskyDecomposition.DEFAULT_ABSOLUTE_POSITIVITY_THRESHOLD);

@@ -3,10 +3,7 @@ package com.github.levyfan.reid.ml;
 import com.github.levyfan.reid.BowImage;
 import com.github.levyfan.reid.bow.Strip;
 import com.github.levyfan.reid.feature.Feature;
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.LUDecomposition;
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.Pair;
 
 import java.util.List;
@@ -19,6 +16,9 @@ import java.util.stream.IntStream;
  * @author fanliwen
  */
 public class KissMe {
+
+    private static final double ZERO = 10e-10;
+    private static final double EPS = 10e-6;
 
     public RealMatrix kissMe(List<BowImage> bowImages, Feature.Type type) {
         int length = bowImages.get(0).sp4[0].features.get(type).length;
@@ -70,7 +70,29 @@ public class KissMe {
         positive = positive.scalarMultiply(1.0/(double) countPositive);
         negative = negative.scalarMultiply(1.0/(double) countNegative);
 
-        return inv(positive).subtract(inv(negative));
+        RealMatrix M = inv(positive).subtract(inv(negative));
+        return validateCovMatrix(M);
+    }
+
+    private static RealMatrix validateCovMatrix(RealMatrix sig) {
+        try {
+            new CholeskyDecomposition(sig);
+            return sig;
+        } catch (NonPositiveDefiniteMatrixException e) {
+            EigenDecomposition eigen = new EigenDecomposition(sig);
+            RealMatrix v = eigen.getV();
+            RealMatrix d = eigen.getD().copy();
+
+            for (int n = 0; n < d.getColumnDimension(); n ++) {
+                if (d.getEntry(n, n) <= ZERO) {
+                    d.setEntry(n, n, EPS);
+                }
+            }
+
+            sig = v.multiply(d).multiply(v.transpose());
+            new CholeskyDecomposition(sig);
+            return sig;
+        }
     }
 
     private static RealMatrix inv(RealMatrix matrix) {

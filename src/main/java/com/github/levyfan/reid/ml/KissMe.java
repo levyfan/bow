@@ -39,7 +39,6 @@ public class KissMe {
             long countPositive = idMap.get(x.id).stream().mapToLong(j -> {
                 BowImage y = bowImages.get(j);
                 if (Objects.equals(x.id, y.id) && j > i) {
-                    System.out.println("positive: " + x.id + " " + y.id);
                     Pair<RealMatrix, Long> pair = km(x, y, type);
                     com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(positive, pair.getFirst());
                     return pair.getSecond();
@@ -83,7 +82,7 @@ public class KissMe {
 
     private static RealMatrix validateCovMatrix(RealMatrix sig) {
         try {
-            new CholeskyDecomposition(sig, 1.0e-8, 1.0e-10);
+            new CholeskyDecomposition(sig, 1.0e-5, 1.0e-10);
             return sig;
         } catch (NonPositiveDefiniteMatrixException e) {
             EigenDecomposition eigen = new EigenDecomposition(sig);

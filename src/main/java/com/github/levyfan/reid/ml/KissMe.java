@@ -76,9 +76,7 @@ public class KissMe {
 
     private static RealMatrix validateCovMatrix(RealMatrix sig) {
         try {
-            new CholeskyDecomposition(sig,
-                    CholeskyDecomposition.DEFAULT_ABSOLUTE_POSITIVITY_THRESHOLD,
-                    CholeskyDecomposition.DEFAULT_ABSOLUTE_POSITIVITY_THRESHOLD);
+            new CholeskyDecomposition(sig, 1.0e-8, 1.0e-10);
             return sig;
         } catch (NonPositiveDefiniteMatrixException e) {
             EigenDecomposition eigen = new EigenDecomposition(sig);

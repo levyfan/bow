@@ -22,7 +22,7 @@ public class MahalanobisDistance implements DistanceMeasure {
         ArrayRealVector vb = new ArrayRealVector(b, false);
         ArrayRealVector delta = va.subtract(vb);
 
-        return Math.sqrt(M.preMultiply(delta).dotProduct(delta));
+        return Math.sqrt(Math.max(M.preMultiply(delta).dotProduct(delta), 0));
     }
 
     @Override

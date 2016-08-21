@@ -3,6 +3,8 @@ package com.github.levyfan.reid.ml;
 import com.github.levyfan.reid.BowImage;
 import com.github.levyfan.reid.bow.Strip;
 import com.github.levyfan.reid.feature.Feature;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.Pair;
 
@@ -23,6 +25,9 @@ public class KissMe {
     public RealMatrix kissMe(List<BowImage> bowImages, Feature.Type type) {
         int length = bowImages.get(0).sp4[0].features.get(type).length;
 
+        Multimap<String, Integer> idMap = ArrayListMultimap.create();
+        IntStream.range(0, bowImages.size()).forEach(i -> idMap.put(bowImages.get(i).id, i));
+
         List<Object[]> objects = IntStream.range(0, bowImages.size()).parallel().mapToObj(i -> {
             RealMatrix positive = MatrixUtils.createRealMatrix(length, length);
             RealMatrix negative = MatrixUtils.createRealMatrix(length, length);
@@ -31,21 +36,23 @@ public class KissMe {
             System.out.println("kissme: " + x.id);
 
             // positive
-            long countPositive = 0;
-            for (int j = i + 1; j < bowImages.size(); j++) {
-                if (Objects.equals(x.id, bowImages.get(j).id)) {
-                    Pair<RealMatrix, Long> pair = km(x, bowImages.get(j), type);
+            long countPositive = idMap.get(x.id).stream().mapToLong(j -> {
+                BowImage y = bowImages.get(j);
+                if (Objects.equals(x.id, y.id) && j > i) {
+                    System.out.println("positive: " + x.id + " " + y.id);
+                    Pair<RealMatrix, Long> pair = km(x, y, type);
                     com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(positive, pair.getFirst());
-                    countPositive += pair.getSecond();
+                    return pair.getSecond();
                 } else {
-//                    break;
+                    return 0;
                 }
-            }
+            }).sum();
 
             // negative
             long countNegative = ThreadLocalRandom.current().ints(5, 0, bowImages.size()).mapToLong(j -> {
-                if (!Objects.equals(x.id, bowImages.get(j).id)) {
-                    Pair<RealMatrix, Long> pair = km(x, bowImages.get(j), type);
+                BowImage y = bowImages.get(j);
+                if (!Objects.equals(x.id, y.id)) {
+                    Pair<RealMatrix, Long> pair = km(x, y, type);
                     com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(negative, pair.getFirst());
                     return pair.getSecond();
                 } else {

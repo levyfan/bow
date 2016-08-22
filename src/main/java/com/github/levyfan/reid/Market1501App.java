@@ -30,7 +30,7 @@ public class Market1501App extends App {
     private static final File trainMaskFolder = new File("/data/reid/market1501/mask/bounding_box_train");
 
     private Market1501App() throws IOException, URISyntaxException, ClassNotFoundException {
-        super();
+        super(new File("codebook_kissme_500_20.mat"));
     }
 
     private List<Pair<Integer, Integer>> idAndCam(File folder) {

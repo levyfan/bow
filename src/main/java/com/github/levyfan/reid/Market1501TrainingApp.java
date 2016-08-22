@@ -40,6 +40,7 @@ public class Market1501TrainingApp extends App {
     private KissMe kissMe = new KissMe();
 
     private Market1501TrainingApp() throws IOException, URISyntaxException, ClassNotFoundException {
+        super(null);
     }
 
     private List<BowImage> featureTraining(File folder, File maskFolder, Feature.Type type) throws IOException {

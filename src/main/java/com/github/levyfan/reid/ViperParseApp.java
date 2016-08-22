@@ -32,7 +32,7 @@ public class ViperParseApp extends App {
     private Map<Integer, List<double[]>> codebook;
 
     private ViperParseApp() throws IOException, URISyntaxException, ClassNotFoundException {
-        super();
+        super(new File("codebook_kissme_500_20.mat"));
         this.bowManager.getBow().getCodebooks().clear();
 
         this.codebook = this.loadCodeBook(new File("codebook.mat"));

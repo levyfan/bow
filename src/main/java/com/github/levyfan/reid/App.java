@@ -65,22 +65,24 @@ public class App {
     StripMethod stripMethod;
     BowManager bowManager;
 
-    App() throws IOException, URISyntaxException, ClassNotFoundException {
-        Map<Feature.Type, List<double[]>> codebook;
+    App(File codebookFile) throws IOException, URISyntaxException, ClassNotFoundException {
+        Map<Feature.Type, List<double[]>> codebook = Collections.emptyMap();
         Map<Feature.Type, DistanceMeasure> distanceMeasures = new EnumMap<>(Feature.Type.class);
-        if (codebookFile.getName().endsWith("dat")) {
-            codebook = this.loadCodeBookDat(codebookFile);
-            for (Feature.Type type : Feature.Type.values()) {
-                distanceMeasures.put(type, new EuclideanDistance());
-            }
-        } else {
-            codebook = this.loadCodeBookMat(codebookFile);
-            Map<Feature.Type, RealMatrix> mMatrixMap = this.loadKissmeMat(codebookFile);
-            for (Feature.Type type : Feature.Type.values()) {
-                if (mMatrixMap.containsKey(type)) {
-                    distanceMeasures.put(type, new MahalanobisDistance(mMatrixMap.get(type)));
-                } else {
+        if (codebookFile != null) {
+            if (codebookFile.getName().endsWith("dat")) {
+                codebook = this.loadCodeBookDat(codebookFile);
+                for (Feature.Type type : Feature.Type.values()) {
                     distanceMeasures.put(type, new EuclideanDistance());
+                }
+            } else {
+                codebook = this.loadCodeBookMat(codebookFile);
+                Map<Feature.Type, RealMatrix> mMatrixMap = this.loadKissmeMat(codebookFile);
+                for (Feature.Type type : Feature.Type.values()) {
+                    if (mMatrixMap.containsKey(type)) {
+                        distanceMeasures.put(type, new MahalanobisDistance(mMatrixMap.get(type)));
+                    } else {
+                        distanceMeasures.put(type, new EuclideanDistance());
+                    }
                 }
             }
         }
@@ -146,7 +148,9 @@ public class App {
             Map<Feature.Type, RealMatrix> mMatrixMap = new EnumMap<>(Feature.Type.class);
             for (Feature.Type type : types) {
                 MLNumericArray ml = (MLNumericArray) reader.getMLArray("M_" + type);
-                mMatrixMap.put(type, MatrixUtils.from(ml));
+                if (ml != null) {
+                    mMatrixMap.put(type, MatrixUtils.from(ml));
+                }
             }
             return mMatrixMap;
         } catch (Exception e) {
@@ -157,6 +161,9 @@ public class App {
 
     List<BowImage> generateHist(File camFolder, File maskFoler, String maskPrefix) throws IOException, ClassNotFoundException {
         File[] camFiles = camFolder.listFiles(filter);
+        Arrays.sort(camFiles);
+        System.out.println(Arrays.toString(camFiles));
+
         return Lists.newArrayList(camFiles)
                 .parallelStream()
                 .map(camFile -> {

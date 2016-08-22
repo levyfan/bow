@@ -28,7 +28,7 @@ public class TrainingApp extends App {
     private static final File mask = new File("/data/reid/TUDpositive_mask");
 
     private TrainingApp() throws IOException, URISyntaxException, ClassNotFoundException {
-        super();
+        super(null);
     }
 
     private List<BowImage> featureTraining(File folder, File maskFolder) throws IOException {

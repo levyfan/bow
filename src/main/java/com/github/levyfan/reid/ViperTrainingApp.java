@@ -38,6 +38,7 @@ public class ViperTrainingApp extends App {
     private KissMe kissMe = new KissMe();
 
     private ViperTrainingApp() throws IOException, URISyntaxException, ClassNotFoundException {
+        super(null);
     }
 
     private List<BowImage> featureTraining(File folder, File maskFolder, Feature.Type type) throws IOException {

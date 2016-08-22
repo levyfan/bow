@@ -26,12 +26,12 @@ public class ViperApp extends App {
 
     private Viper viper = new Viper();
 
-    private ViperApp() throws IOException, URISyntaxException, ClassNotFoundException {
-        super();
+    private ViperApp(File codebookFile) throws IOException, URISyntaxException, ClassNotFoundException {
+        super(codebookFile);
     }
 
     public static void main( String[] args ) throws IOException, URISyntaxException, ClassNotFoundException {
-        ViperApp app = new ViperApp();
+        ViperApp app = new ViperApp(new File(args[0]));
 
         List<BowImage> bowImagesA = app.generateHist(testingA, maskA, "mask_");
         List<BowImage> bowImagesB = app.generateHist(testingB, maskB, "mask_");

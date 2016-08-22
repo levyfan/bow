@@ -43,4 +43,15 @@ public class BlasPca {
             this.eigvalue[i] = this.eigvalue[i] * this.eigvalue[i];
         }
     }
+
+    public DoubleMatrix apply(List<double[]> hists) {
+        DoubleMatrix matrix = new DoubleMatrix(hists.toArray(new double[0][])).transpose();
+        for (int row = 0; row < matrix.getRows(); row++) {
+            for (int col = 0; col < matrix.getColumns(); col++) {
+                matrix.put(row, col, matrix.get(row, col) - this.mean[row]);
+            }
+        }
+
+        return this.u.transpose().mmul(matrix);
+    }
 }

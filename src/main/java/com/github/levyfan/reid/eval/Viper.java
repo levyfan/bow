@@ -11,7 +11,6 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.util.Pair;
 import org.jblas.DoubleMatrix;
-import org.jblas.ranges.IntervalRange;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +22,7 @@ import java.util.List;
  */
 public class Viper {
 
-    private RealMatrix select;
+    public RealMatrix select;
 
     public Viper() throws URISyntaxException, IOException {
         try (InputStream stream = this.getClass().getResourceAsStream("/randselect10.mat")) {
@@ -89,15 +88,8 @@ public class Viper {
             List<double[]> hist = Lists.newArrayList(Iterables.concat(histA, histB));
             BlasPca pca = new BlasPca(hist);
 
-//            DoubleMatrix u = pca.u;
-//            DoubleMatrix histPcaA = u.transpose().mmul(
-//                    new DoubleMatrix(histA.toArray(new double[0][])).transpose());
-//            DoubleMatrix histPcaB = u.transpose().mmul(
-//                    new DoubleMatrix(histB.toArray(new double[0][])).transpose());
-            DoubleMatrix histPcaA = pca.ux.get(
-                    new IntervalRange(0, pca.ux.getRows()), new IntervalRange(0, histA.size()));
-            DoubleMatrix histPcaB = pca.ux.get(
-                    new IntervalRange(0, pca.ux.getRows()), new IntervalRange(histA.size(), hist.size()));
+            DoubleMatrix histPcaA = pca.apply(histA);
+            DoubleMatrix histPcaB = pca.apply(histB);
             score = MatrixUtils.createRealMatrix(
                     histPcaA.transpose().mmul(histPcaB).toArray2());
         } else {

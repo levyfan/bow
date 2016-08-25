@@ -96,9 +96,13 @@ public class KissMe {
             }
 
             sig = v.multiply(d).multiply(v.transpose());
-            new CholeskyDecomposition(sig,
-                    CholeskyDecomposition.DEFAULT_ABSOLUTE_POSITIVITY_THRESHOLD,
-                    CholeskyDecomposition.DEFAULT_ABSOLUTE_POSITIVITY_THRESHOLD);
+            try {
+                new CholeskyDecomposition(sig,
+                        CholeskyDecomposition.DEFAULT_ABSOLUTE_POSITIVITY_THRESHOLD,
+                        CholeskyDecomposition.DEFAULT_ABSOLUTE_POSITIVITY_THRESHOLD);
+            } catch (Exception ee) {
+                ee.printStackTrace();
+            }
             return sig;
         }
     }

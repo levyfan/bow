@@ -1,7 +1,5 @@
 package com.github.levyfan.reid;
 
-import com.github.levyfan.reid.eval.Market1501;
-import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.util.MatrixUtils;
 import com.google.common.base.Joiner;
 import com.google.common.primitives.Doubles;
@@ -13,7 +11,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author fanliwen
@@ -29,8 +29,8 @@ public class Market1501App extends App {
     private static final File trainCamFolder = new File("/data/reid/market1501/dataset/bounding_box_train");
     private static final File trainMaskFolder = new File("/data/reid/market1501/mask/bounding_box_train");
 
-    private Market1501App() throws IOException, URISyntaxException, ClassNotFoundException {
-        super(new File("codebook_kissme_500_20.mat"));
+    private Market1501App(File codebookFile) throws IOException, URISyntaxException, ClassNotFoundException {
+        super(codebookFile);
     }
 
     private List<Pair<Integer, Integer>> idAndCam(File folder) {
@@ -48,7 +48,7 @@ public class Market1501App extends App {
     }
 
     public static void main(String[] args) throws ClassNotFoundException, IOException, URISyntaxException {
-        Market1501App app = new Market1501App();
+        Market1501App app = new Market1501App(new File(args[0]));
 
         List<BowImage> queryBowImages = app.generateHist(queryCamFolder, queryMaskFolder, "");
         List<BowImage> testBowImages = app.generateHist(testCamFolder, testMaskFolder, "");

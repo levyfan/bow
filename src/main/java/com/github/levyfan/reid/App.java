@@ -2,6 +2,7 @@ package com.github.levyfan.reid;
 
 import com.github.levyfan.reid.bow.Bow;
 import com.github.levyfan.reid.bow.BowManager;
+import com.github.levyfan.reid.bow.ParsingMethod;
 import com.github.levyfan.reid.bow.StripMethod;
 import com.github.levyfan.reid.codebook.CodeBook;
 import com.github.levyfan.reid.feature.Feature;
@@ -50,8 +51,6 @@ public class App {
     private static final int stripLength = 8;
     private static final int patchSize = 4;
     static final int pstep = 0;
-
-    private static final File codebookFile = new File("codebook_kissme_500_20.mat");
 
     static final boolean wordLevel = false;
     private static final boolean patch = false;

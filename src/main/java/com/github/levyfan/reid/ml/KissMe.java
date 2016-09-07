@@ -5,9 +5,13 @@ import com.github.levyfan.reid.bow.Strip;
 import com.github.levyfan.reid.feature.Feature;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.jmatio.io.MatFileWriter;
+import com.jmatio.types.MLDouble;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.Pair;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
@@ -108,7 +112,19 @@ public class KissMe {
     }
 
     private static RealMatrix inv(RealMatrix matrix) {
-        return new LUDecomposition(matrix).getSolver().getInverse();
+        try {
+            return new LUDecomposition(matrix).getSolver().getInverse();
+        } catch (SingularMatrixException e) {
+            try {
+                new MatFileWriter().write(
+                        "singular.mat",
+                        Collections.singleton(new MLDouble("matrix", matrix.getData())));
+            } catch (IOException ee) {
+                ee.printStackTrace();
+            }
+
+            throw e;
+        }
     }
 
     private static Pair<RealMatrix, Long> km(BowImage i, BowImage j, Feature.Type type) {

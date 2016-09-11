@@ -111,7 +111,7 @@ public class Prid450sTrainingApp extends App {
             Set<Integer> testIndex = new HashSet<>(Ints.asList(
                     DoubleStream.of(app.prid450s.select.getColumn(loop)).mapToInt(s -> (int) (s-1)).toArray()));
 
-            for (Feature.Type type : new Feature.Type[]{Feature.Type.CN, Feature.Type.HOG, Feature.Type.SILTP}) {
+            for (Feature.Type type : App.types) {
                 // extract feature
                 List<BowImage> bowImages = app.featureTraining(testingA, testingA, type, testIndex);
                 bowImages.addAll(app.featureTraining(testingB, testingB, type, testIndex));

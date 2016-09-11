@@ -122,6 +122,7 @@ public class App {
             Map<Feature.Type, List<double[]>> codebooks = new EnumMap<>(Feature.Type.class);
             for (Feature.Type type : types) {
                 MLNumericArray ml = (MLNumericArray) reader.getMLArray("codebook_" + type);
+//                MLNumericArray ml = (MLNumericArray) reader.getMLArray("" + type);
 
                 List<double[]> codebook = new ArrayList<>();
                 for (int i = 0; i < ml.getM(); i++) {

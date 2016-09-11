@@ -52,12 +52,12 @@ public class Market1501App extends App {
 
         List<BowImage> queryBowImages = app.generateHist(queryCamFolder, queryMaskFolder, "");
         List<BowImage> testBowImages = app.generateHist(testCamFolder, testMaskFolder, "");
-//        List<BowImage> trainBowImages = app.generateHist(trainCamFolder, trainMaskFolder, "");
+        List<BowImage> trainBowImages = app.generateHist(trainCamFolder, trainMaskFolder, "");
 
         System.out.println("hist fusion");
         List<double[]> queryHist = (List<double[]>) app.fusion(queryBowImages, types);
         List<double[]> testHist = (List<double[]>) app.fusion(testBowImages, types);
-//        List<double[]> trainHist = (List<double[]>) app.fusion(trainBowImages, types);
+        List<double[]> trainHist = (List<double[]>) app.fusion(trainBowImages, types);
 
         // write to mat/csv
         System.out.println("write query hist to mat");
@@ -73,13 +73,13 @@ public class Market1501App extends App {
                 writer.println(Joiner.on(',').join(Doubles.asList(hist)));
             }
         }
-//        System.out.println("write train hist to mat");
-//        try (FileOutputStream os = new FileOutputStream(
-//                "market1501_hist_train_" + numSuperpixels + "_" + compactness + "_" + pstep + ".csv");
-//             PrintWriter writer = new PrintWriter(os, true)) {
-//            for (double[] hist : trainHist) {
-//                writer.println(Joiner.on(',').join(Doubles.asList(hist)));
-//            }
-//        }
+        System.out.println("write train hist to mat");
+        try (FileOutputStream os = new FileOutputStream(
+                "market1501_hist_train_" + numSuperpixels + "_" + compactness + "_" + pstep + ".csv");
+             PrintWriter writer = new PrintWriter(os, true)) {
+            for (double[] hist : trainHist) {
+                writer.println(Joiner.on(',').join(Doubles.asList(hist)));
+            }
+        }
     }
 }

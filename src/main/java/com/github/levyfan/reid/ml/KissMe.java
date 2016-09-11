@@ -5,13 +5,9 @@ import com.github.levyfan.reid.bow.Strip;
 import com.github.levyfan.reid.feature.Feature;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.jmatio.io.MatFileWriter;
-import com.jmatio.types.MLDouble;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.Pair;
 
-import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
@@ -88,7 +84,15 @@ public class KissMe {
         try {
             new CholeskyDecomposition(sig, 1.0e-5, 1.0e-10);
             return sig;
-        } catch (NonPositiveDefiniteMatrixException e) {
+        } catch (NonPositiveDefiniteMatrixException | NonSymmetricMatrixException e) {
+            if (e instanceof NonSymmetricMatrixException) {
+                NonSymmetricMatrixException ee = (NonSymmetricMatrixException) e;
+                System.out.println("(" + ee.getRow() + "," + ee.getColumn() + ")="
+                        + sig.getEntry(ee.getRow(), ee.getColumn()));
+                System.out.println("(" + ee.getColumn() + "," + ee.getRow() + ")="
+                        + sig.getEntry(ee.getColumn(), ee.getRow()));
+            }
+
             EigenDecomposition eigen = new EigenDecomposition(sig);
             RealMatrix v = eigen.getV();
             RealMatrix d = eigen.getD().copy();
@@ -115,15 +119,8 @@ public class KissMe {
         try {
             return new LUDecomposition(matrix).getSolver().getInverse();
         } catch (SingularMatrixException e) {
-            try {
-                new MatFileWriter().write(
-                        "singular.mat",
-                        Collections.singleton(new MLDouble("matrix", matrix.getData())));
-            } catch (IOException ee) {
-                ee.printStackTrace();
-            }
-
-            throw e;
+            e.printStackTrace();
+            return new SingularValueDecomposition(matrix).getSolver().getInverse();
         }
     }
 

@@ -1,15 +1,15 @@
 function [ mAP, r1_precision ] = calcmAP( M, data_test, data_query )
-query=dir('dataset/query/*.jpg');
-dataset=dir('dataset/bounding_box_test/*.jpg');
+query=dir('/data/reid/market1501/dataset/query/*.jpg');
+dataset=dir('/data/reid/market1501/dataset/bounding_box_test/*.jpg');
 dist = sqdist(data_test, data_query, M);
 ap = zeros(size(dist, 2), 1);
 r1 = 0;
 for k = 1:size(dist, 2)
     k
     % find groudtruth index (good and junk)
-    file_name1 = ['dataset/gt_query/' query(k).name(1:19) '_good.mat'];
+    file_name1 = ['/data/reid/market1501/dataset/gt_query/' query(k).name(1:19) '_good.mat'];
     good_index = importdata(file_name1);
-    file_name2 = ['dataset/gt_query/' query(k).name(1:19) '_junk.mat'];
+    file_name2 = ['/data/reid/market1501/dataset/gt_query/' query(k).name(1:19) '_junk.mat'];
     junk_index = importdata(file_name2); 
     score = dist(:, k);
     [~, index] = sort(score, 'ascend');% the higher, the better

@@ -4,6 +4,7 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.jblas.DoubleMatrix;
 import org.jblas.Singular;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -18,6 +19,11 @@ public class BlasPca {
     public DoubleMatrix u;
 
     public DoubleMatrix ux;
+
+    public BlasPca(DoubleMatrix u, double[] mean) {
+        this.u = u;
+        this.mean = mean;
+    }
 
     public BlasPca(List<double[]> hists) {
         DoubleMatrix matrix = new DoubleMatrix(hists.toArray(new double[0][])).transpose();
@@ -53,5 +59,14 @@ public class BlasPca {
         }
 
         return this.u.transpose().mmul(matrix);
+    }
+
+    public double[] apply(double[] hist) {
+        DoubleMatrix matrix = new DoubleMatrix(Arrays.copyOf(hist, hist.length));
+        for (int row = 0; row < matrix.getRows(); row ++) {
+            matrix.put(row, 0, matrix.get(row, 0) - this.mean[row]);
+        }
+
+        return this.u.transpose().mmul(matrix).toArray();
     }
 }

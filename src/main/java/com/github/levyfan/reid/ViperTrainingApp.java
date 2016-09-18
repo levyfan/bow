@@ -70,6 +70,7 @@ public class ViperTrainingApp extends App {
                         featureManager.feature(bowImage, type);
 
                         bowImage.id = files[i].getName().split("_")[0];
+                        bowImage.cam = folder.getPath();
                         return bowImage;
                     } catch (IOException e) {
                         throw new RuntimeException(e);

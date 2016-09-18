@@ -61,6 +61,7 @@ public class Market1501TrainingApp extends App {
                         featureManager.feature(bowImage, type);
 
                         bowImage.id = file.getName().split("_")[0];
+                        bowImage.cam = file.getName().split("_")[1].substring(0, 2);
                         return bowImage;
                     } catch (IOException e) {
                         throw new RuntimeException(e);

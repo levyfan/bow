@@ -38,7 +38,7 @@ public class KissMe {
             // positive
             long countPositive = idMap.get(x.id).stream().mapToLong(j -> {
                 BowImage y = bowImages.get(j);
-                if (Objects.equals(x.id, y.id) && j > i) {
+                if (Objects.equals(x.id, y.id) && j > i && !Objects.equals(x.cam, y.cam)) {
                     Pair<RealMatrix, Long> pair = km(x, y, type);
                     com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(positive, pair.getFirst());
                     return pair.getSecond();
@@ -50,7 +50,7 @@ public class KissMe {
             // negative
             long countNegative = ThreadLocalRandom.current().ints(5, 0, bowImages.size()).mapToLong(j -> {
                 BowImage y = bowImages.get(j);
-                if (!Objects.equals(x.id, y.id)) {
+                if (!Objects.equals(x.id, y.id) && !Objects.equals(x.cam, y.cam)) {
                     Pair<RealMatrix, Long> pair = km(x, y, type);
                     com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(negative, pair.getFirst());
                     return pair.getSecond();

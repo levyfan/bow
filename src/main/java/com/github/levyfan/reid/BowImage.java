@@ -30,6 +30,8 @@ public class BowImage {
 
     public String id;
 
+    public String cam;
+
     public Map<Feature.Type, double[]> hist = new EnumMap<>(Feature.Type.class);
 
 //    public Map<Feature.Type, double[]> features = new EnumMap<>(Feature.Type.class);

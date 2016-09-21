@@ -55,9 +55,9 @@ public class Market1501App extends App {
         List<BowImage> trainBowImages = app.generateHist(trainCamFolder, trainMaskFolder, "");
 
         System.out.println("hist fusion");
-        List<double[]> queryHist = (List<double[]>) app.fusion(queryBowImages, types);
-        List<double[]> testHist = (List<double[]>) app.fusion(testBowImages, types);
-        List<double[]> trainHist = (List<double[]>) app.fusion(trainBowImages, types);
+        List<double[]> queryHist = (List<double[]>) app.fusionHists(queryBowImages, types);
+        List<double[]> testHist = (List<double[]>) app.fusionHists(testBowImages, types);
+        List<double[]> trainHist = (List<double[]>) app.fusionHists(trainBowImages, types);
 
         // write to mat/csv
         System.out.println("write query hist to mat");

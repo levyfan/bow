@@ -22,7 +22,16 @@ public class KissMe {
     private static final double ZERO = 10e-10;
     private static final double EPS = 10e-6;
 
-    public RealMatrix kissMe(List<BowImage> bowImages, Feature.Type type) {
+    public RealMatrix apply(List<BowImage> bowImages, Feature.Type type) {
+        Pair<RealMatrix, RealMatrix> pair = pairPositiveNegative(bowImages, type);
+        RealMatrix positive = pair.getFirst();
+        RealMatrix negative = pair.getSecond();
+
+        RealMatrix M = inv(positive).subtract(inv(negative));
+        return validateCovMatrix(M);
+    }
+
+    Pair<RealMatrix, RealMatrix> pairPositiveNegative(List<BowImage> bowImages, Feature.Type type) {
         int length = bowImages.get(0).sp4[0].features.get(type).length;
 
         Multimap<String, Integer> idMap = ArrayListMultimap.create();
@@ -76,11 +85,10 @@ public class KissMe {
         positive = positive.scalarMultiply(1.0/(double) countPositive);
         negative = negative.scalarMultiply(1.0/(double) countNegative);
 
-        RealMatrix M = inv(positive).subtract(inv(negative));
-        return validateCovMatrix(M);
+        return Pair.create(positive, negative);
     }
 
-    private static RealMatrix validateCovMatrix(RealMatrix sig) {
+    static RealMatrix validateCovMatrix(RealMatrix sig) {
         try {
             new CholeskyDecomposition(sig, 1.0e-5, 1.0e-10);
             return sig;
@@ -115,7 +123,7 @@ public class KissMe {
         }
     }
 
-    private static RealMatrix inv(RealMatrix matrix) {
+    static RealMatrix inv(RealMatrix matrix) {
         try {
             return new LUDecomposition(matrix).getSolver().getInverse();
         } catch (SingularMatrixException e) {

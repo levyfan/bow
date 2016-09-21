@@ -1,15 +1,11 @@
 package com.github.levyfan.reid;
 
-import com.github.levyfan.reid.bow.Strip;
 import com.github.levyfan.reid.eval.Viper;
 import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.ml.KissMe;
 import com.github.levyfan.reid.ml.MahalanobisDistance;
-import com.github.levyfan.reid.sp.SuperPixel;
 import com.github.levyfan.reid.util.MatrixUtils;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLDouble;
@@ -24,7 +20,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -78,32 +77,6 @@ public class ViperTrainingApp extends App {
                 }).collect(Collectors.toList());
     }
 
-    @Override
-    Iterable<double[]> fusion(List<BowImage> bowImages, Feature.Type[] types) {
-        List<List<double[]>> list = bowImages.stream().map(bowImage -> {
-            List<double[]> features = new ArrayList<>();
-            Set<Integer> nSuperPixels = new HashSet<>();
-            for (Strip strip : bowImage.strip4) {
-                for (int n : strip.superPixels) {
-                    if (nSuperPixels.contains(n)) {
-                        break;
-                    }
-                    nSuperPixels.add(n);
-
-                    SuperPixel superPixel = bowImage.sp4[n];
-                    double[][] fusion = new double[types.length][];
-                    for (int i = 0; i < types.length; i++) {
-                        fusion[i] = superPixel.features.get(types[i]);
-                    }
-                    features.add(Doubles.concat(fusion));
-                }
-            }
-            return features;
-        }).collect(Collectors.toList());
-
-        return Iterables.concat(list);
-    }
-
     public static void main(String[] args) throws ClassNotFoundException, IOException, URISyntaxException {
         ViperTrainingApp app = new ViperTrainingApp();
 
@@ -119,10 +92,10 @@ public class ViperTrainingApp extends App {
                 bowImages.addAll(app.featureTraining(testingB, maskB, type, testIndex));
 
                 // KissMe
-                RealMatrix M = app.kissMe.kissMe(bowImages, type);
+                RealMatrix M = app.kissMe.apply(bowImages, type);
 
                 // feature fusion
-                Iterable<double[]> feature = app.fusion(bowImages, new Feature.Type[]{type});
+                Iterable<double[]> feature = app.fusionFeatures(bowImages, new Feature.Type[]{type});
 
                 // clear bowImages to release memory
                 bowImages.clear();

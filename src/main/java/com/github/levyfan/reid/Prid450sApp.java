@@ -59,8 +59,8 @@ public class Prid450sApp extends App {
         List<BowImage> bowImagesA = app.generateHist(testingA, testingA, "");
         List<BowImage> bowImagesB = app.generateHist(testingB, testingB, "");
 
-        List<double[]> histA = (List<double[]>) app.fusion(bowImagesA, types);
-        List<double[]> histB = (List<double[]>) app.fusion(bowImagesB, types);
+        List<double[]> histA = (List<double[]>) app.fusionHists(bowImagesA, types);
+        List<double[]> histB = (List<double[]>) app.fusionHists(bowImagesB, types);
 
         // write to mat
         new MatFileWriter().write(

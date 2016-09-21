@@ -55,7 +55,7 @@ public class TrainingApp extends App {
     }
 
     @Override
-    Iterable<double[]> fusion(List<BowImage> bowImages, Feature.Type[] types) {
+    Iterable<double[]> fusionHists(List<BowImage> bowImages, Feature.Type[] types) {
         List<List<double[]>> list = bowImages.stream().map(bowImage -> {
             List<double[]> features = new ArrayList<>();
             for (SuperPixel superPixel : bowImage.sp4) {

@@ -36,8 +36,8 @@ public class ViperApp extends App {
         List<BowImage> bowImagesA = app.generateHist(testingA, maskA, "mask_");
         List<BowImage> bowImagesB = app.generateHist(testingB, maskB, "mask_");
 
-        List<double[]> histA = (List<double[]>) app.fusion(bowImagesA, types);
-        List<double[]> histB = (List<double[]>) app.fusion(bowImagesB, types);
+        List<double[]> histA = (List<double[]>) app.fusionHists(bowImagesA, types);
+        List<double[]> histB = (List<double[]>) app.fusionHists(bowImagesB, types);
 
         // write to mat
         new MatFileWriter().write(
@@ -58,8 +58,8 @@ public class ViperApp extends App {
 
         // word level fusion
         if (wordLevel) {
-            histA = (List<double[]>) app.fusion(bowImagesA, new Feature.Type[]{Feature.Type.ALL});
-            histB = (List<double[]>) app.fusion(bowImagesB, new Feature.Type[]{Feature.Type.ALL});
+            histA = (List<double[]>) app.fusionHists(bowImagesA, new Feature.Type[]{Feature.Type.ALL});
+            histB = (List<double[]>) app.fusionHists(bowImagesB, new Feature.Type[]{Feature.Type.ALL});
             MR = app.viper.eval(histA, histB, false).getFirst();
             System.out.println("wordLevel:" + Doubles.asList(MR).subList(0, 50));
         }
@@ -67,8 +67,8 @@ public class ViperApp extends App {
         // separate
         RealMatrix[] scores = new RealMatrix[types.length];
         for (Feature.Type type : types) {
-            histA = (List<double[]>) app.fusion(bowImagesA, new Feature.Type[]{type});
-            histB = (List<double[]>) app.fusion(bowImagesB, new Feature.Type[]{type});
+            histA = (List<double[]>) app.fusionHists(bowImagesA, new Feature.Type[]{type});
+            histB = (List<double[]>) app.fusionHists(bowImagesB, new Feature.Type[]{type});
             Pair<double[], RealMatrix> pair = app.viper.eval(histA, histB, false);
             scores[type.ordinal()] = pair.getSecond();
             System.out.println(type + ":" + Doubles.asList(pair.getFirst()).subList(0,50));

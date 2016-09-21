@@ -1,17 +1,16 @@
 package com.github.levyfan.reid;
 
-import com.github.levyfan.reid.bow.Bow;
-import com.github.levyfan.reid.bow.BowManager;
-import com.github.levyfan.reid.bow.ParsingMethod;
-import com.github.levyfan.reid.bow.StripMethod;
+import com.github.levyfan.reid.bow.*;
 import com.github.levyfan.reid.codebook.CodeBook;
 import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.feature.FeatureManager;
 import com.github.levyfan.reid.ml.MahalanobisDistance;
 import com.github.levyfan.reid.sp.PatchMethod;
 import com.github.levyfan.reid.sp.SlicMethod;
+import com.github.levyfan.reid.sp.SuperPixel;
 import com.github.levyfan.reid.sp.SuperPixelMethond;
 import com.github.levyfan.reid.util.MatrixUtils;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.PatternFilenameFilter;
 import com.google.common.primitives.Doubles;
@@ -184,13 +183,13 @@ public class App {
                 }).collect(Collectors.toList());
     }
 
-    Iterable<double[]> fusion(List<BowImage> bowImages, Feature.Type[] types) {
+    Iterable<double[]> fusionHists(List<BowImage> bowImages, Feature.Type[] types) {
         return bowImages.parallelStream().map(bowImage -> {
-            double[][] features = new double[types.length][];
+            double[][] hists = new double[types.length][];
             for (int i = 0; i < types.length; i++) {
-                features[i] = bowImage.hist.get(types[i]);
+                hists[i] = bowImage.hist.get(types[i]);
             }
-            double[] hist = Doubles.concat(features);
+            double[] hist = Doubles.concat(hists);
 
             // normalize
             double sum = Math.sqrt(new SumOfSquares().evaluate(hist));
@@ -199,6 +198,31 @@ public class App {
             }
             return hist;
         }).collect(Collectors.toList());
+    }
+
+    Iterable<double[]> fusionFeatures(List<BowImage> bowImages, Feature.Type[] types) {
+        List<List<double[]>> list = bowImages.stream().map(bowImage -> {
+            List<double[]> features = new ArrayList<>();
+            Set<Integer> nSuperPixels = new HashSet<>();
+            for (Strip strip : bowImage.strip4) {
+                for (int n : strip.superPixels) {
+                    if (nSuperPixels.contains(n)) {
+                        break;
+                    }
+                    nSuperPixels.add(n);
+
+                    SuperPixel superPixel = bowImage.sp4[n];
+                    double[][] fusion = new double[types.length][];
+                    for (int i = 0; i < types.length; i++) {
+                        fusion[i] = superPixel.features.get(types[i]);
+                    }
+                    features.add(Doubles.concat(fusion));
+                }
+            }
+            return features;
+        }).collect(Collectors.toList());
+
+        return Iterables.concat(list);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.github.levyfan.reid.eval.Viper;
 import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.ml.KissMe;
 import com.github.levyfan.reid.ml.MahalanobisDistance;
+import com.github.levyfan.reid.ml.Xqda;
 import com.github.levyfan.reid.util.MatrixUtils;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
@@ -38,7 +39,7 @@ public class ViperTrainingApp extends App {
     private static final File maskA = new File("/data/reid/viper/mask/cam_a");
     private static final File maskB = new File("/data/reid/viper/mask/cam_b");
 
-    private KissMe kissMe = new KissMe();
+    private KissMe kissMe = new Xqda();
     private Viper viper = new Viper();
 
     private ViperTrainingApp() throws IOException, URISyntaxException, ClassNotFoundException {
@@ -112,7 +113,7 @@ public class ViperTrainingApp extends App {
 
                 System.out.print("start translate to mat");
                 new MatFileWriter().write(
-                        "Viper_loop" + loop + "_" + type + "_" + numSuperpixels + "_" + compactness + ".mat",
+                        "Viper_xqda_loop" + loop + "_" + type + "_" + numSuperpixels + "_" + compactness + ".mat",
                         Lists.newArrayList(
                                 MatrixUtils.to("codebook_" + type, codeBook),
                                 new MLDouble("M_" + type, M.getData())

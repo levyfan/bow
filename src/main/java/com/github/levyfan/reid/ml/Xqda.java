@@ -6,7 +6,9 @@ import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.util.Pair;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * @author fanliwen
@@ -19,28 +21,40 @@ public class Xqda extends KissMe {
         RealMatrix intra = pair.getFirst();
         RealMatrix extra = pair.getSecond();
 
+        for (int i = 0; i < intra.getRowDimension(); i ++) {
+            intra.setEntry(i, i, intra.getEntry(i, i) + 0.001);
+        }
+
         EigenDecomposition ed = new EigenDecomposition(inv(intra).multiply(extra));
         RealMatrix V = ed.getV();
+        double[] eigen = ed.getRealEigenvalues();
 
-        RealMatrix W;
+        int[] sortedIndex = IntStream.range(0, eigen.length).boxed()
+                .sorted((i, j) -> Double.compare(eigen[j], eigen[i]))
+                .mapToInt(Integer::intValue)
+                .toArray();
+
+        int[] selectedRows = IntStream.range(0, V.getRowDimension()).toArray();
+        int[] selectedColumns;
+
         switch (type) {
             case HSV:
-                W = V.getSubMatrix(0, V.getRowDimension()-1, 0, 49);
+                selectedColumns = Arrays.copyOf(sortedIndex, 50);
                 break;
             case SILTP:
-                W = V.getSubMatrix(0, V.getRowDimension()-1, 0, 99);
+                selectedColumns = Arrays.copyOf(sortedIndex, 100);
                 break;
             case HOG:
             case CN:
             default:
-                W = V;
+                selectedColumns = sortedIndex;
                 break;
         }
+        RealMatrix W = V.getSubMatrix(selectedRows, selectedColumns);
 
         RealMatrix positive = W.transpose().multiply(intra).multiply(W);
         RealMatrix negative = W.transpose().multiply(extra).multiply(W);
 
-        RealMatrix M = W.multiply(inv(positive).subtract(inv(negative))).multiply(W.transpose());
-        return validateCovMatrix(M);
+        return W.multiply(inv(positive).subtract(inv(negative))).multiply(W.transpose());
     }
 }

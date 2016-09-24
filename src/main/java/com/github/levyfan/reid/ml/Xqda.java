@@ -26,7 +26,6 @@ public class Xqda extends KissMe {
         }
 
         EigenDecomposition ed = new EigenDecomposition(inv(intra).multiply(extra));
-        RealMatrix V = ed.getV();
         double[] eigen = ed.getRealEigenvalues();
 
         int[] sortedIndex = IntStream.range(0, eigen.length).boxed()
@@ -34,9 +33,8 @@ public class Xqda extends KissMe {
                 .mapToInt(Integer::intValue)
                 .toArray();
 
-        int[] selectedRows = IntStream.range(0, V.getRowDimension()).toArray();
+        int[] selectedRows = IntStream.range(0, eigen.length).toArray();
         int[] selectedColumns;
-
         switch (type) {
             case HSV:
                 selectedColumns = Arrays.copyOf(sortedIndex, 50);
@@ -50,11 +48,13 @@ public class Xqda extends KissMe {
                 selectedColumns = sortedIndex;
                 break;
         }
-        RealMatrix W = V.getSubMatrix(selectedRows, selectedColumns);
+        RealMatrix W = ed.getV().getSubMatrix(selectedRows, selectedColumns);
 
         RealMatrix positive = W.transpose().multiply(intra).multiply(W);
         RealMatrix negative = W.transpose().multiply(extra).multiply(W);
 
-        return W.multiply(inv(positive).subtract(inv(negative))).multiply(W.transpose());
+        RealMatrix M = inv(positive).subtract(inv(negative));
+        RealMatrix MM = validateCovMatrix(M);
+        return W.multiply(MM).multiply(W.transpose());
     }
 }

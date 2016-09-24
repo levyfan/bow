@@ -106,7 +106,7 @@ public class KissMe {
             RealMatrix d = eigen.getD().copy();
 
             for (int n = 0; n < d.getColumnDimension(); n ++) {
-                if (d.getEntry(n, n) <= ZERO) {
+                if (d.getEntry(n, n) < ZERO) {
                     d.setEntry(n, n, EPS);
                 }
             }

@@ -17,7 +17,7 @@ load ../../resources/randselect10.mat;
 
 for nf = 1 : numFolds
     clear HistA HistB;
-    load(['hist_loop' num2str(numFolds-1) '_500_20.0.mat']);
+    load(['hist_cam_loop' num2str(numFolds-1) '_500_20.0.mat']);
     % load('hist_500_20.0.mat');
     
     descriptors = [HistA';HistB'];

@@ -20,7 +20,7 @@ accuracy = zeros(lookrank,nloop);
 for loop = 1:nloop
     loop
     clear HistA HistB;
-    load(['viper_cam_hist_loop' num2str(loop-1) '_500_20.0.mat']);
+    load(['hist_cam_loop' num2str(loop-1) '_500_20.0.mat']);
     % load('hist_500_20.0.mat');
     
     testIndex = selectsample(:,loop);

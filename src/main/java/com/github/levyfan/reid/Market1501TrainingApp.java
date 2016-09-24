@@ -18,7 +18,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -86,16 +85,7 @@ public class Market1501TrainingApp extends App {
                     new MahalanobisDistance(M),
                     new JDKRandomGenerator(),
                     KMeansPlusPlusClusterer.EmptyClusterStrategy.FARTHEST_POINT);
-            List<DoublePoint> points = new ArrayList<>();
-            for (double[] point : feature) {
-                points.add(new DoublePoint(point));
-            }
-            System.out.println("kmeans: " + type);
-
-            List<double[]> codeBook = clusterer.cluster(points)
-                    .stream()
-                    .map(centroidCluster -> centroidCluster.getCenter().getPoint())
-                    .collect(Collectors.toList());
+            List<double[]> codeBook = app.codeBook.codebook(clusterer, feature);
 
             System.out.print("start translate to mat");
             new MatFileWriter().write(

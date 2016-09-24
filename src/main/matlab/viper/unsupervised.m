@@ -17,11 +17,11 @@ nSample = size(HistA,2)/2;
 lookrank = nSample;
 nloop = 10;
 accuracy = zeros(lookrank,nloop);
-for loop = 1:10
+for loop = 1:nloop
     loop
     clear HistA HistB;
-    % load(['hist_loop' num2str(loop-1) '_500_20.0.mat']);
-    load('hist_500_20.0.mat');
+    load(['hist_cam_loop' num2str(loop-1) '_500_20.0.mat']);
+    % load('hist_500_20.0.mat');
 
     testIndex = selectsample(:,loop);
     testA = HistA(:,testIndex);

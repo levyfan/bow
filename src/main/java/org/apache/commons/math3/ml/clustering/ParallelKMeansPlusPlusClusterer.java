@@ -148,7 +148,7 @@ public class ParallelKMeansPlusPlusClusterer<T extends Clusterable> extends KMea
         }
 
         // create the initial clusters
-        List<CentroidCluster<T>> clusters = chooseInitialCenters(points);
+        final List<CentroidCluster<T>> clusters = chooseInitialCenters(points);
 
         // create an array containing the latest assignment of a point to a cluster
         // no need to initialize the array, as it will be filled with the first assignment
@@ -159,12 +159,11 @@ public class ParallelKMeansPlusPlusClusterer<T extends Clusterable> extends KMea
         final int max = (maxIterations < 0) ? Integer.MAX_VALUE : maxIterations;
         for (int count = 0; count < max; count++) {
             AtomicBoolean emptyCluster = new AtomicBoolean(false);
-            final List<CentroidCluster<T>> finalClusters = clusters;
 
-            List<CentroidCluster<T>> newClusters = finalClusters.parallelStream().map(cluster -> {
+            List<CentroidCluster<T>> newClusters = clusters.parallelStream().map(cluster -> {
                 final Clusterable newCenter;
                 if (cluster.getPoints().isEmpty()) {
-                    newCenter = getClusterable(finalClusters);
+                    newCenter = getClusterable(clusters);
                     emptyCluster.set(true);
                 } else {
                     newCenter = centroidOf(cluster.getPoints(), cluster.getCenter().getPoint().length);
@@ -173,7 +172,8 @@ public class ParallelKMeansPlusPlusClusterer<T extends Clusterable> extends KMea
             }).collect(Collectors.toList());
 
             int changes = assignPointsToClusters(newClusters, points, assignments);
-            clusters = newClusters;
+            clusters.clear();
+            clusters.addAll(newClusters);
 
             // if there were no more changes in the point-to-cluster assignment
             // and there are no empty clusters left, return the current clusters

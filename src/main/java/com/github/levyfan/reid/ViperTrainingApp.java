@@ -102,23 +102,33 @@ public class ViperTrainingApp extends App {
                 bowImages.clear();
 
                 // kmeans
-                System.out.println("kmeans: " + type);
-                ParallelKMeansPlusPlusClusterer<DoublePoint> clusterer = new ParallelKMeansPlusPlusClusterer<>(
-                        codeBookSize,
-                        100,
-                        new MahalanobisDistance(M),
-                        new JDKRandomGenerator(),
-                        KMeansPlusPlusClusterer.EmptyClusterStrategy.FARTHEST_POINT);
-                List<double[]> codeBook = app.codeBook.codebook(clusterer, feature);
+                try {
+                    System.out.println("kmeans: " + type);
+                    ParallelKMeansPlusPlusClusterer<DoublePoint> clusterer = new ParallelKMeansPlusPlusClusterer<>(
+                            codeBookSize,
+                            100,
+                            new MahalanobisDistance(M),
+                            new JDKRandomGenerator(),
+                            KMeansPlusPlusClusterer.EmptyClusterStrategy.FARTHEST_POINT);
+                    List<double[]> codeBook = app.codeBook.codebook(clusterer, feature);
 
-                System.out.print("start translate to mat");
-                new MatFileWriter().write(
-                        "Viper_xqda_loop" + loop + "_" + type + "_" + numSuperpixels + "_" + compactness + ".mat",
-                        Lists.newArrayList(
-                                MatrixUtils.to("codebook_" + type, codeBook),
-                                new MLDouble("M_" + type, M.getData())
-                        )
-                );
+                    System.out.print("start translate to mat");
+                    new MatFileWriter().write(
+                            "Viper_xqda_loop" + loop + "_" + type + "_" + numSuperpixels + "_" + compactness + ".mat",
+                            Lists.newArrayList(
+                                    MatrixUtils.to("codebook_" + type, codeBook),
+                                    new MLDouble("M_" + type, M.getData())
+                            )
+                    );
+                } catch (Exception e) {
+                    new MatFileWriter().write(
+                            "error_xqda_loop" + loop + "_" + type + "_" + numSuperpixels + "_" + compactness + ".mat",
+                            Lists.newArrayList(new MLDouble("M_" + type, M.getData()))
+                    );
+
+                    e.printStackTrace();
+                    throw e;
+                }
             }
         }
 

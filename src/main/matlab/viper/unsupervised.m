@@ -11,17 +11,19 @@ params.numCoeffs = 100; %dimensionality reduction by PCA to 200 dimension
 
 %% trial
 load ../../resources/randselect10.mat;
-load hist_500_20.0.mat;
+load feature_rows.mat;
 
-nSample = size(HistA,2)/2;
+nSample = 632/2;
 lookrank = nSample;
 nloop = 10;
 accuracy = zeros(lookrank,nloop);
 for loop = 1:nloop
     loop
     clear HistA HistB;
-    load(['hist_cam_loop' num2str(loop-1) '_500_20.0.mat']);
+    load(['hist_xqda_loop' num2str(loop-1) '_500_20.0.mat']);
     % load('hist_500_20.0.mat');
+    HistA = HistA(hog_rows,:);
+    HistB = HistB(hog_rows,:);
 
     testIndex = selectsample(:,loop);
     testA = HistA(:,testIndex);

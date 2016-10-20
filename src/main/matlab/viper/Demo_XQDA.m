@@ -14,11 +14,14 @@ rng(seed);
 %% evaluate
 cms = zeros(numFolds, numRanks);
 load ../../resources/randselect10.mat;
+load feature_rows.mat;
 
 for nf = 1 : numFolds
     clear HistA HistB;
-    load(['hist_cam_loop' num2str(numFolds-1) '_500_20.0.mat']);
-    % load('hist_500_20.0.mat');
+    % load(['hist_loop' num2str(numFolds-1) '_500_20.0.mat']);
+    load('hist_500_20.0.mat');
+    HistA = HistA(cn_rows,:);
+    HistB = HistB(cn_rows,:);
     
     descriptors = [HistA';HistB'];
     galFea = descriptors(1 : numClass, :);

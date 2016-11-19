@@ -65,6 +65,8 @@ public class App {
     BowManager bowManager;
 
     App(File codebookFile) throws IOException, URISyntaxException, ClassNotFoundException {
+        System.out.println("codebook file: " + codebookFile);
+
         Map<Feature.Type, List<double[]>> codebook = Collections.emptyMap();
         Map<Feature.Type, DistanceMeasure> distanceMeasures = new EnumMap<>(Feature.Type.class);
         if (codebookFile != null) {
@@ -122,7 +124,9 @@ public class App {
             Map<Feature.Type, List<double[]>> codebooks = new EnumMap<>(Feature.Type.class);
             for (Feature.Type type : EnumSet.allOf(Feature.Type.class)) {
                 MLNumericArray ml = (MLNumericArray) reader.getMLArray("codebook_" + type);
-//                MLNumericArray ml = (MLNumericArray) reader.getMLArray("" + type);
+                if (ml == null) {
+                    ml = (MLNumericArray) reader.getMLArray("" + type);
+                }
                 if (ml == null) {
                     System.err.println("codebook not found, type=" + type);
                     continue;

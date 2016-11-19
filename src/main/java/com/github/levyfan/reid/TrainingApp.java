@@ -4,6 +4,7 @@ import com.github.levyfan.reid.feature.Feature;
 import com.github.levyfan.reid.util.MatrixUtils;
 import com.google.common.collect.Lists;
 import com.jmatio.io.MatFileWriter;
+import com.jmatio.types.MLArray;
 import org.apache.commons.math3.ml.clustering.DoublePoint;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.clustering.ParallelKMeansPlusPlusClusterer;
@@ -70,6 +71,7 @@ public class TrainingApp extends App {
         // clear bowImages to release memory
         bowImages.clear();
 
+        Map<Feature.Type, MLArray> codebookMap = new EnumMap<>(Feature.Type.class);
         // training
         for (Feature.Type type : App.types) {
             Iterable<double[]> feature = featureMap.get(type);
@@ -83,13 +85,12 @@ public class TrainingApp extends App {
                     KMeansPlusPlusClusterer.EmptyClusterStrategy.FARTHEST_POINT);
             List<double[]> codeBook = app.codeBook.codebook(clusterer, feature);
 
-            System.out.print("start translate to mat");
-            new MatFileWriter().write(
-                    "TUD_positive_" + type + "_" + numSuperpixels + "_" + compactness + ".mat",
-                    Lists.newArrayList(
-                            MatrixUtils.to("codebook_" + type, codeBook)
-                    )
-            );
+            codebookMap.put(type, MatrixUtils.to("codebook_" + type, codeBook));
         }
+
+        System.out.println("start translate to mat");
+        new MatFileWriter().write(
+                "TUD_positive_" + numSuperpixels + "_" + compactness + ".mat",
+                codebookMap.values());
     }
 }

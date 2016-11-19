@@ -22,14 +22,14 @@ public class FeatureManager {
         this.features.put(Feature.Type.CN, new Cn());
         this.features.put(Feature.Type.HOG, new Hog());
         this.features.put(Feature.Type.SILTP, new Siltp());
-        this.features.put(Feature.Type.OPQ_1, new Opq.Opq_1());
-        this.features.put(Feature.Type.OPQ_2, new Opq.Opq_2());
-        this.features.put(Feature.Type.OPQ_3, new Opq.Opq_3());
-        this.features.put(Feature.Type.OPQ_4, new Opq.Opq_4());
+//        this.features.put(Feature.Type.OPQ_1, new Opq.Opq_1());
+//        this.features.put(Feature.Type.OPQ_2, new Opq.Opq_2());
+//        this.features.put(Feature.Type.OPQ_3, new Opq.Opq_3());
+//        this.features.put(Feature.Type.OPQ_4, new Opq.Opq_4());
 
         featureTypes = new Feature.Type[]{
                 Feature.Type.HSV, Feature.Type.CN, Feature.Type.HOG, Feature.Type.SILTP,
-                Feature.Type.OPQ_1, Feature.Type.OPQ_2, Feature.Type.OPQ_3, Feature.Type.OPQ_4
+//                Feature.Type.OPQ_1, Feature.Type.OPQ_2, Feature.Type.OPQ_3, Feature.Type.OPQ_4
         };
     }
 

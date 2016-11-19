@@ -37,8 +37,12 @@ import java.util.stream.Collectors;
  *
  */
 public class App {
+
     public static final Feature.Type[] types = new Feature.Type[]{
             Feature.Type.HSV, Feature.Type.CN, Feature.Type.HOG, Feature.Type.SILTP};
+
+    public static final Feature.Type[] types_opq = new Feature.Type[] {
+            Feature.Type.OPQ_1, Feature.Type.OPQ_2, Feature.Type.OPQ_3, Feature.Type.OPQ_4};
 
     static final int numSuperpixels = 500;
     static final double compactness = 20;
@@ -119,9 +123,13 @@ public class App {
             MatFileReader reader = new MatFileReader(mat);
 
             Map<Feature.Type, List<double[]>> codebooks = new EnumMap<>(Feature.Type.class);
-            for (Feature.Type type : types) {
+            for (Feature.Type type : EnumSet.allOf(Feature.Type.class)) {
                 MLNumericArray ml = (MLNumericArray) reader.getMLArray("codebook_" + type);
 //                MLNumericArray ml = (MLNumericArray) reader.getMLArray("" + type);
+                if (ml == null) {
+                    System.err.println("codebook not found, type=" + type);
+                    continue;
+                }
 
                 List<double[]> codebook = new ArrayList<>();
                 for (int i = 0; i < ml.getM(); i++) {

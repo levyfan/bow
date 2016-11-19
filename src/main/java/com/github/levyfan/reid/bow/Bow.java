@@ -61,14 +61,8 @@ public class Bow {
         return codebooks;
     }
 
-    void bow(BowImage bowImage, Feature.Type type, int randomProjectionTreeIndex) {
+    void bow(BowImage bowImage, Feature.Type type) {
         List<double[]> codebook = codebooks.get(type);
-//         if (type == Feature.Type.ALL) {
-//            codebook = IntStream.range(0, codebook.size())
-//                    .filter(index -> index % 4 == randomProjectionTreeIndex)
-//                    .mapToObj(codebook::get)
-//                    .collect(Collectors.toList());
-//         }
 
         int[] tf = new int[codebook.size()];
         List<int[]> words = new ArrayList<>(bowImage.sp4.length);

@@ -57,27 +57,6 @@ public class ViperApp extends App {
         MR = app.viper.eval(histA, histB, true).getFirst();
         System.out.println("descriptorLevel pca:" + Doubles.asList(MR).subList(0, 50));
 
-        // opq fusion
-        List<double[]> histOpqA = (List<double[]>) app.fusionHists(bowImagesA, types_opq);
-        List<double[]> histOpqB = (List<double[]>) app.fusionHists(bowImagesB, types_opq);
-
-        // write to mat
-        new MatFileWriter().write(
-                "OPQ_hist_" + numSuperpixels + "_" + compactness + ".mat",
-                Arrays.asList(
-                        com.github.levyfan.reid.util.MatrixUtils.to("HistA", histOpqA),
-                        com.github.levyfan.reid.util.MatrixUtils.to("HistB", histOpqB)
-                )
-        );
-
-        // descriptor level non-pca
-        MR = app.viper.eval(histOpqA, histOpqB, false).getFirst();
-        System.out.println("OPQ descriptorLevel not_pca:" + Doubles.asList(MR).subList(0, 50));
-
-        // descriptor level pca
-        MR = app.viper.eval(histOpqA, histOpqB, true).getFirst();
-        System.out.println("OPQ descriptorLevel pca:" + Doubles.asList(MR).subList(0, 50));
-
         // word level fusion
         if (wordLevel) {
             histA = (List<double[]>) app.fusionHists(bowImagesA, new Feature.Type[]{Feature.Type.ALL});

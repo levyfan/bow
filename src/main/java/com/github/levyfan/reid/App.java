@@ -41,9 +41,6 @@ public class App {
     public static final Feature.Type[] types = new Feature.Type[]{
             Feature.Type.HSV, Feature.Type.CN, Feature.Type.HOG, Feature.Type.SILTP};
 
-    public static final Feature.Type[] types_opq = new Feature.Type[] {
-            Feature.Type.OPQ_1, Feature.Type.OPQ_2, Feature.Type.OPQ_3, Feature.Type.OPQ_4};
-
     static final int numSuperpixels = 500;
     static final double compactness = 20;
     static final int codeBookSize = 350;

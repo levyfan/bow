@@ -114,9 +114,8 @@ public class KissMe {
             long countPositive = idMap.get(x.id).stream().mapToLong(j -> {
                 BowImage y = bowImages.get(j);
                 if (Objects.equals(x.id, y.id) && j > i && !Objects.equals(x.cam, y.cam)) {
-                    RealMatrix tmp = km(x, y);
                     synchronized (positive) {
-                        com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(positive, tmp);
+                        km(positive, x, y);
                     }
                     return 1;
                 } else {
@@ -128,9 +127,8 @@ public class KissMe {
             long countNegative = ThreadLocalRandom.current().ints(5, 0, bowImages.size()).mapToLong(j -> {
                 BowImage y = bowImages.get(j);
                 if (!Objects.equals(x.id, y.id) && !Objects.equals(x.cam, y.cam)) {
-                    RealMatrix tmp = km(x, y);
                     synchronized (negative) {
-                        com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(negative, tmp);
+                        km(negative, x, y);
                     }
                     return 1;
                 } else {
@@ -223,5 +221,17 @@ public class KissMe {
         ArrayRealVector jHist = new ArrayRealVector(j.hist.get(Feature.Type.ALL), false);
         ArrayRealVector delta = iHist.subtract(jHist);
         return delta.outerProduct(delta);
+    }
+
+    private static void km(RealMatrix matrix, BowImage i, BowImage j) {
+        double[] iHist = i.hist.get(Feature.Type.ALL);
+        double[] jHist = j.hist.get(Feature.Type.ALL);
+
+        for (int m = 0; m < iHist.length; m ++) {
+            for (int n = 0; n < jHist.length; n ++) {
+                double d = (iHist[m] - jHist[m]) * (iHist[n] - jHist[n]);
+                matrix.setEntry(m, n, matrix.getEntry(m, n) + d);
+            }
+        }
     }
 }

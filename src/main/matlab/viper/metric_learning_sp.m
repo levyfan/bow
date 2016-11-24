@@ -22,20 +22,22 @@ for loop = 1:nloop
     clear HistA HistB;
     % load(['hist_xqda_loop' num2str(loop-1) '_500_20.0.mat']);
     load('hist_500_20.0.mat');
-    HistA = HistA(hsv_rows,:);
-    HistB = HistB(hsv_rows,:);
+    % HistA = HistA(hsv_rows,:);
+    % HistB = HistB(hsv_rows,:);
     
     testIndex = selectsample(:,loop);
     trainIndex = 1:numberA;
     trainIndex(testIndex) = [];
     
-    %% Extract training features and train PCA
-    [ux,eigvalue,u,m] = mypca([HistA(:,trainIndex),HistB(:,trainIndex)]);
-    Hist_train = (ux(1:params.numCoeffs,:));
-    trainCam = [ones(1,nSample),2*ones(1,nSample)];
-        
     testA = HistA(:,testIndex);
     testB = HistB(:,testIndex);
+    trainCam = [ones(1,nSample),2*ones(1,nSample)];
+    Hist_train = [HistA(:,trainIndex), HistB(:,trainIndex)];
+    
+    %% Extract training features and train PCA
+    [ux,eigvalue,u,m] = mypca(Hist_train);
+    Hist_train = (ux(1:params.numCoeffs,:));
+    
     testA = u'*(testA-repmat(m,1,size(testA,2)));
     testB = u'*(testB-repmat(m,1,size(testB,2)));
     testA = (testA(1:params.numCoeffs,:));
@@ -85,7 +87,8 @@ for loop = 1:nloop
 
     % Metric learning
     pair_metric_learn_algs = {...
-    LearnAlgoKISSME(params), ...
+        LearnAlgoKISSME(params), ...
+    %     LearnAlgoXQDA(params), ...
     %     LearnAlgoMahal(), ...
     %     LearnAlgoMLEuclidean(), ...
     %     LearnAlgoITML(), ... 

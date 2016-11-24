@@ -20,10 +20,10 @@ accuracy = zeros(lookrank,nloop);
 for loop = 1:nloop
     loop
     clear HistA HistB;
-    load(['hist_xqda_loop' num2str(loop-1) '_500_20.0.mat']);
-    % load('hist_500_20.0.mat');
-    HistA = HistA(hog_rows,:);
-    HistB = HistB(hog_rows,:);
+    % load(['hist_xqda_loop' num2str(loop-1) '_500_20.0.mat']);
+    load('viper_lomo.mat');
+    % HistA = HistA(hog_rows,:);
+    % HistB = HistB(hog_rows,:);
 
     testIndex = selectsample(:,loop);
     testA = HistA(:,testIndex);

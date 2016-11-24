@@ -17,8 +17,8 @@ load ../../resources/randselect10_prid450s.mat;
 
 for nf = 1 : numFolds
     clear HistA HistB;
-    load(['hist_loop' num2str(numFolds-1) '_500_20.0.mat']);
-    % load('prid450s_hist_500_20.0.mat');
+    % load(['hist_loop' num2str(numFolds-1) '_500_20.0.mat']);
+    load('prid_lomo.mat');
     
     descriptors = [HistA';HistB'];
     galFea = descriptors(1 : numClass, :);

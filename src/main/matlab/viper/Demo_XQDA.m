@@ -3,6 +3,8 @@
 
 close all; clear; clc;
 
+addpath('../');
+
 numClass = 632;
 numFolds = 10;
 numRanks = 100;
@@ -20,8 +22,8 @@ for nf = 1 : numFolds
     clear HistA HistB;
     % load(['hist_loop' num2str(numFolds-1) '_500_20.0.mat']);
     load('hist_500_20.0.mat');
-    HistA = HistA(cn_rows,:);
-    HistB = HistB(cn_rows,:);
+    % HistA = HistA(cn_rows,:);
+    % HistB = HistB(cn_rows,:);
     
     descriptors = [HistA';HistB'];
     galFea = descriptors(1 : numClass, :);

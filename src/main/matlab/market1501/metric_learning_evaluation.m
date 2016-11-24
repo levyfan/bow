@@ -11,12 +11,12 @@ codebooksize = 350;
 params.numCoeffs = 200; %dimensionality reduction by PCA to 200 dimension
 
 %% Extract training features and train PCA
-Hist_train = importdata('market1501_new_hist_train_500_20.0.mat');
+Hist_train = importdata('market1501_hist_train_500_20.0.mat');
 [ux,eigvalue,u,m] = mypca(Hist_train);
 
 %% Extract testing and query features and apply PCA
-Hist_test = importdata('market1501_new_hist_test_500_20.0.mat');
-Hist_query = importdata('market1501_new_hist_query_500_20.0.mat');
+Hist_test = importdata('market1501_hist_test_500_20.0.mat');
+Hist_query = importdata('market1501_hist_query_500_20.0.mat');
 ux_test=u'*(Hist_test-repmat(m,1,size(Hist_test,2)));
 ux_query=u'*(Hist_query-repmat(m,1,size(Hist_query,2)));
 
@@ -69,7 +69,7 @@ flag = [flag; zeros(nPos, 1)];
 % set params.numCoeffs to 100 or lower.
 pair_metric_learn_algs = {...
     LearnAlgoKISSME(params), ...
-%     LearnAlgoMahal(), ...
+%     LearnAlgoXQDA(params), ...
 %     LearnAlgoMLEuclidean(), ...
 %     LearnAlgoITML(), ... 
 %     LearnAlgoLMNN() ...  
@@ -83,4 +83,3 @@ figure;
 s = 50;
 CMC_curve = [ds.kissme.cmc; ]; %ds.mahal.cmc; ds.identity.cmc ];
 plot(1:s, CMC_curve(:, 1:s));
-

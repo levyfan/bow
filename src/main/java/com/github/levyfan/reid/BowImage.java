@@ -36,6 +36,8 @@ public class BowImage {
 
 //    public Map<Feature.Type, double[]> features = new EnumMap<>(Feature.Type.class);
 
+    public BowImage() {}
+
     public BowImage(SuperPixelMethond spMethod, StripMethod stripMethod, BufferedImage image, BufferedImage mask) {
         this.image = image;
         this.image4 = ImageUtils.resize(image, 4, false);

@@ -8,6 +8,7 @@ import org.apache.commons.math3.util.Pair;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
@@ -60,7 +61,7 @@ public class Xqda extends KissMe {
     }
 
     @Override
-    public RealMatrix apply(List<BowImage> bowImages) {
+    public RealMatrix apply(List<BowImage> bowImages) throws ExecutionException, InterruptedException {
         Pair<RealMatrix, RealMatrix> pair = pairPositiveNegative(bowImages);
         RealMatrix intra = pair.getFirst();
         RealMatrix extra = pair.getSecond();

@@ -4,13 +4,14 @@ import com.github.levyfan.reid.BowImage;
 import com.github.levyfan.reid.bow.Strip;
 import com.github.levyfan.reid.feature.Feature;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.Pair;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -22,6 +23,8 @@ public class KissMe {
     private static final double ZERO = 10e-10;
     private static final double EPS = 10e-6;
 
+    private ExecutorService executorService = Executors.newWorkStealingPool();
+
     public RealMatrix apply(List<BowImage> bowImages, Feature.Type type) {
         Pair<RealMatrix, RealMatrix> pair = pairPositiveNegative(bowImages, type);
         RealMatrix positive = pair.getFirst();
@@ -31,7 +34,7 @@ public class KissMe {
         return validateCovMatrix(M);
     }
 
-    public RealMatrix apply(List<BowImage> bowImages) {
+    public RealMatrix apply(List<BowImage> bowImages) throws ExecutionException, InterruptedException {
         Pair<RealMatrix, RealMatrix> pair = pairPositiveNegative(bowImages);
         RealMatrix positive = pair.getFirst();
         RealMatrix negative = pair.getSecond();
@@ -97,55 +100,41 @@ public class KissMe {
         return Pair.create(positive, negative);
     }
 
-    Pair<RealMatrix, RealMatrix> pairPositiveNegative(List<BowImage> bowImages) {
+    Pair<RealMatrix, RealMatrix> pairPositiveNegative(List<BowImage> bowImages) throws ExecutionException, InterruptedException {
         int length = bowImages.get(0).hist.get(Feature.Type.ALL).length;
 
         Multimap<String, Integer> idMap = ArrayListMultimap.create();
         IntStream.range(0, bowImages.size()).forEach(i -> idMap.put(bowImages.get(i).id, i));
 
-        final RealMatrix positive = MatrixUtils.createRealMatrix(length, length);
-        final RealMatrix negative = MatrixUtils.createRealMatrix(length, length);
+        List<List<BowImage>> input = Lists.partition(
+                bowImages, bowImages.size() / Runtime.getRuntime().availableProcessors());
 
-        Pair<Long, Long> counter = IntStream.range(0, bowImages.size()).parallel().mapToObj(i -> {
-            BowImage x = bowImages.get(i);
-            System.out.println("kissme: " + x.id);
+        List<Callable<Object[]>> tasks = input.stream()
+                .map(list -> new PairPN(length, Lists.newArrayList(list), bowImages, idMap))
+                .collect(Collectors.toList());
 
-            // positive
-            long countPositive = idMap.get(x.id).stream().mapToLong(j -> {
-                BowImage y = bowImages.get(j);
-                if (Objects.equals(x.id, y.id) && j > i && !Objects.equals(x.cam, y.cam)) {
-                    synchronized (positive) {
-                        km(positive, x, y);
-                    }
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }).sum();
+        System.out.println("processors=" + Runtime.getRuntime().availableProcessors());
+        System.out.println("task_nums=" + tasks.size());
 
-            // negative
-            long countNegative = ThreadLocalRandom.current().ints(5, 0, bowImages.size()).mapToLong(j -> {
-                BowImage y = bowImages.get(j);
-                if (!Objects.equals(x.id, y.id) && !Objects.equals(x.cam, y.cam)) {
-                    synchronized (negative) {
-                        km(negative, x, y);
-                    }
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }).sum();
+        List<Future<Object[]>> output = executorService.invokeAll(tasks);
 
-            return Pair.create(countPositive, countNegative);
-        }).reduce((p1, p2) -> Pair.create(
-                p1.getFirst() + p2.getFirst(), p1.getSecond() + p2.getSecond())).get();
+        RealMatrix positive = MatrixUtils.createRealMatrix(length, length);
+        RealMatrix negative = MatrixUtils.createRealMatrix(length, length);
+        long countPositive = 0;
+        long countNegative = 0;
 
-        long countPositive = counter.getFirst();
-        long countNegative = counter.getSecond();
-        RealMatrix _positive = positive.scalarMultiply(1.0/(double) countPositive);
-        RealMatrix _negative = negative.scalarMultiply(1.0/(double) countNegative);
+        for (Future<Object[]> future : output) {
+            Object[] result = future.get();
 
-        return Pair.create(_positive, _negative);
+            com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(positive, (RealMatrix) result[0]);
+            com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(negative, (RealMatrix) result[1]);
+            countPositive += ((Pair<Long, Long>) result[2]).getFirst();
+            countNegative += ((Pair<Long, Long>) result[2]).getSecond();
+        }
+
+        positive = positive.scalarMultiply(1.0/(double) countPositive);
+        negative = negative.scalarMultiply(1.0/(double) countNegative);
+        return Pair.create(positive, negative);
     }
 
     static RealMatrix validateCovMatrix(RealMatrix sig) {

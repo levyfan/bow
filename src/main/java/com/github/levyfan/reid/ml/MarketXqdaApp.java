@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author fanliwen
@@ -28,7 +29,7 @@ public class MarketXqdaApp {
     private static final PatternFilenameFilter filter =
             new PatternFilenameFilter("[^\\s]+(\\.(?i)(jpg|png|gif|bmp))$");
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         MatFileReader reader = new MatFileReader(args[0]);
         MLArray mlArray = reader.getMLArray("Hist_train");
         RealMatrix hist = MatrixUtils.from((MLNumericArray) mlArray);

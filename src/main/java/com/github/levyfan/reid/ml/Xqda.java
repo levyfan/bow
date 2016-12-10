@@ -65,6 +65,7 @@ public class Xqda extends KissMe {
         Pair<RealMatrix, RealMatrix> pair = pairPositiveNegative(bowImages);
         RealMatrix intra = pair.getFirst();
         RealMatrix extra = pair.getSecond();
+        System.out.println("pair wise positive negative done.");
 
         for (int i = 0; i < intra.getRowDimension(); i ++) {
             intra.setEntry(i, i, intra.getEntry(i, i) + 0.001);

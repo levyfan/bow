@@ -23,7 +23,8 @@ public class KissMe {
     private static final double ZERO = 10e-10;
     private static final double EPS = 10e-6;
 
-    private ExecutorService executorService = Executors.newWorkStealingPool();
+    private static final int WORKER_NUM = 4;
+    private ExecutorService executorService = Executors.newWorkStealingPool(WORKER_NUM);
 
     public RealMatrix apply(List<BowImage> bowImages, Feature.Type type) {
         Pair<RealMatrix, RealMatrix> pair = pairPositiveNegative(bowImages, type);
@@ -107,27 +108,37 @@ public class KissMe {
         IntStream.range(0, bowImages.size()).forEach(i -> idMap.put(bowImages.get(i).id, i));
 
         List<List<BowImage>> input = Lists.partition(
-                bowImages, bowImages.size() / Runtime.getRuntime().availableProcessors());
+                bowImages, bowImages.size() / WORKER_NUM);
 
         List<Callable<Object[]>> tasks = input.stream()
                 .map(list -> new PairPN(length, Lists.newArrayList(list), bowImages, idMap))
                 .collect(Collectors.toList());
 
-        System.out.println("processors=" + Runtime.getRuntime().availableProcessors());
+        System.out.println("workers=" + WORKER_NUM);
         System.out.println("task_nums=" + tasks.size());
 
         List<Future<Object[]>> output = executorService.invokeAll(tasks);
 
-        RealMatrix positive = MatrixUtils.createRealMatrix(length, length);
-        RealMatrix negative = MatrixUtils.createRealMatrix(length, length);
+        RealMatrix positive = null;
+        RealMatrix negative = null;
         long countPositive = 0;
         long countNegative = 0;
 
         for (Future<Object[]> future : output) {
             Object[] result = future.get();
 
-            com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(positive, (RealMatrix) result[0]);
-            com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(negative, (RealMatrix) result[1]);
+            if (positive == null) {
+                positive = (RealMatrix) result[0];
+            } else {
+                com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(positive, (RealMatrix) result[0]);
+            }
+
+            if (negative == null) {
+                negative = (RealMatrix) result[1];
+            } else {
+                com.github.levyfan.reid.util.MatrixUtils.inplaceAdd(negative, (RealMatrix) result[1]);
+            }
+
             countPositive += ((Pair<Long, Long>) result[2]).getFirst();
             countNegative += ((Pair<Long, Long>) result[2]).getSecond();
         }

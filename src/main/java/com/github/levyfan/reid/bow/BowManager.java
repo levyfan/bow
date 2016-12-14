@@ -45,8 +45,8 @@ public class BowManager {
             }
         }
 
-        bowImage.sp4 = null;
-        bowImage.strip4 = null;
+//        bowImage.sp4 = null;
+//        bowImage.strip4 = null;
     }
 
     @Override

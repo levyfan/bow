@@ -39,20 +39,20 @@ public class FeatureManager {
         }
 
         // release memory
-        bowImage.image = null;
-        bowImage.image4 = null;
-        bowImage.mask = null;
-        bowImage.mask4 = null;
+//        bowImage.image = null;
+//        bowImage.image4 = null;
+//        bowImage.mask = null;
+//        bowImage.mask4 = null;
     }
 
     public void feature(BowImage bowImage, Feature.Type type) {
         features.get(type).extract(bowImage);
 
         // release memory
-        bowImage.image = null;
-        bowImage.image4 = null;
-        bowImage.mask = null;
-        bowImage.mask4 = null;
+//        bowImage.image = null;
+//        bowImage.image4 = null;
+//        bowImage.mask = null;
+//        bowImage.mask4 = null;
     }
 
     @Override

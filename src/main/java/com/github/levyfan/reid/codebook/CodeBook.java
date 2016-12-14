@@ -56,7 +56,7 @@ public class CodeBook {
         return doubles;
     }
 
-    public List<double[]> codebook(
+    public static List<double[]> codebook(
             KMeansPlusPlusClusterer<DoublePoint> clusterer,
             Iterable<double[]> feature) {
         List<DoublePoint> points = StreamSupport.stream(feature.spliterator(), false)

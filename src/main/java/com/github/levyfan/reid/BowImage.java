@@ -32,11 +32,23 @@ public class BowImage {
 
     public String cam;
 
+    public String camPair;
+
     public Map<Feature.Type, double[]> hist = new EnumMap<>(Feature.Type.class);
 
 //    public Map<Feature.Type, double[]> features = new EnumMap<>(Feature.Type.class);
 
     public BowImage() {}
+
+    public BowImage(BufferedImage image, BufferedImage mask) {
+        this.image = image;
+        this.image4 = ImageUtils.resize(image, 4, false);
+
+        if (mask != null) {
+            this.mask = mask;
+            this.mask4 = ImageUtils.resize(mask, 4, true);
+        }
+    }
 
     public BowImage(SuperPixelMethond spMethod, StripMethod stripMethod, BufferedImage image, BufferedImage mask) {
         this.image = image;

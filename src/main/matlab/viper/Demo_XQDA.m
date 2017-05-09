@@ -20,8 +20,8 @@ load feature_rows.mat;
 
 for nf = 1 : numFolds
     clear HistA HistB;
-    % load(['hist_loop' num2str(numFolds-1) '_500_20.0.mat']);
-    load('hist_500_20.0.mat');
+    load(['hist_cam_loop' num2str(numFolds-1) '_500_20.0.mat']);
+    % load('hist_500_20.0.mat');
     % HistA = HistA(cn_rows,:);
     % HistB = HistB(cn_rows,:);
     
@@ -72,3 +72,5 @@ plot(1 : numRanks, meanCms);
 fprintf('The average performance:\n');
 fprintf(' Rank1,  Rank5, Rank10, Rank15, Rank20\n');
 fprintf('%5.2f%%, %5.2f%%, %5.2f%%, %5.2f%%, %5.2f%%\n\n', meanCms([1,5,10,15,20]) * 100);
+
+meanCms = meanCms(1:50);

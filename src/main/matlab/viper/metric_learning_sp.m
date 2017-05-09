@@ -11,7 +11,7 @@ params.numCoeffs = 100; %dimensionality reduction by PCA to 200 dimension
 
 %% trial
 load ../../resources/randselect10.mat;
-load feature_rows.mat;
+load viper_lomo.mat;
 
 nSample = 632/2;
 lookrank = nSample;
@@ -20,8 +20,8 @@ accuracy = zeros(lookrank,nloop);
 for loop = 1:nloop
     loop
     clear HistA HistB;
-    % load(['hist_xqda_loop' num2str(loop-1) '_500_20.0.mat']);
-    load('hist_500_20.0.mat');
+    % load(['hist_cam_loop' num2str(loop-1) '_500_20.0.mat']);
+    load('viper_lomo.mat');
     % HistA = HistA(hsv_rows,:);
     % HistB = HistB(hsv_rows,:);
     
@@ -124,4 +124,4 @@ for loop = 1:nloop
     accuracy(:,loop) = (accuracyqA+accuracyqB)/2;
 end
 MR = mean(accuracy,2);
-disp(MR([1,20]));
+MR = MR(1:50)';

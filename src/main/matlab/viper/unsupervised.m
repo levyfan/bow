@@ -20,8 +20,8 @@ accuracy = zeros(lookrank,nloop);
 for loop = 1:nloop
     loop
     clear HistA HistB;
-    % load(['hist_xqda_loop' num2str(loop-1) '_500_20.0.mat']);
-    load('viper_lomo.mat');
+    load(['hist_cam_loop' num2str(loop-1) '_500_20.0.mat']);
+    % load('hist_500_20.0.mat');
     % HistA = HistA(hog_rows,:);
     % HistB = HistB(hog_rows,:);
 
@@ -58,4 +58,4 @@ for loop = 1:nloop
     accuracy(:,loop) = (accuracyqA+accuracyqB)/2;
 end
 MR = mean(accuracy,2);
-disp(MR([1,20]));
+MR = MR(1:50)';

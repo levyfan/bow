@@ -11,7 +11,7 @@ params.numCoeffs = 100; %dimensionality reduction by PCA to 200 dimension
 
 %% trial
 load ../../resources/randselect10_prid450s.mat;
-load prid_lomo.mat;
+load prid450s_hist_500_20.0.mat;
 
 nSample = size(HistA,2)/2;
 lookrank = nSample;
@@ -21,7 +21,7 @@ for loop = 1:10
     loop
     clear HistA HistB;
     % load(['hist_loop' num2str(loop-1) '_500_20.0.mat']);
-    load('prid_lomo.mat');
+    load('prid450s_hist_500_20.0.mat');
 
     testIndex = selectsample(:,loop);
     testA = HistA(:,testIndex);
